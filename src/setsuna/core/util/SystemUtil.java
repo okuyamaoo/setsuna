@@ -11,7 +11,8 @@ import java.util.*;
 public class SystemUtil {
 
     public static void debug(Object obj) {
-        System.out.println(obj);
+        if (SetsunaStaticConfig.DEBUG_SETSUNA) 
+            System.out.println(obj);
     }
 
 }

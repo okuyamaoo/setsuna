@@ -132,6 +132,7 @@ public class CauseContainer {
     protected boolean executeCause(String value, Integer type, String causeValue) {
         if (value == null || type == null) return false;
 
+        SystemUtil.debug("-trigger debug=[" + value + " " + value.equals(causeValue) + " " + causeValue + "]");
         switch (type.intValue()) {
             case 1 : 
 

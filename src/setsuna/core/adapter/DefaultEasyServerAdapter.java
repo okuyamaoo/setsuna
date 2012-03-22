@@ -138,10 +138,15 @@ public class DefaultEasyServerAdapter implements IAdapter  {
             retMap = new LinkedHashMap();
             String[] data = (String[])this.nextDataQueue.take();
 
+            StringBuilder debugData = new StringBuilder();
+            String sep ="";
             for (int idx = 0; idx < columnList.length; idx++) {
+                debugData.append(sep);
+                debugData.append("[0]=\"" + data[idx] + "\"");
+                sep = ",";
                 retMap.put(this.columnList[idx], data[idx]);
             }
-            
+            SystemUtil.debug("Server Input debug=[" + debugData + "]");
         } catch (Exception e) {
             //System.err.println("readLine=" + readLine);
             //throw new SetsunaException("Adapter read string =[" + readLine + "]", e);

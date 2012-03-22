@@ -44,7 +44,7 @@ public class ConditionContainer {
             this.preparedStatementList = new PreparedStatement[this.queryList.length];
 
             for (int idx = 0; idx < this.queryList.length; idx++) {
-                SystemUtil.debug("Query SQL=" + this.queryList[idx]);
+
                 this.preparedStatementList[idx] = this.conn.prepareStatement(this.queryList[idx]);
             }
         } catch (Exception e) {
@@ -65,6 +65,7 @@ public class ConditionContainer {
             }*/
 
             for (int idx = 0; idx < this.preparedStatementList.length; idx++) {
+                SystemUtil.debug("-query debug=[" + this.queryList[idx] + "]");
                 ResultSet resultSet = this.preparedStatementList[idx].executeQuery();
                 if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TYPE == 1) {
                     if (!resultSet.next()) {

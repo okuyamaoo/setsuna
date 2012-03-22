@@ -41,6 +41,8 @@ public class SetsunaMain {
      * -argtype ユーザイベントへの引数のフォーマット(JSON, ",")
      * -stream inputで受け取った際のデータStreamの名前。内部ではテーブル名などに利用(指定がない場合は"pipe"となる)
      * -atime inputで受け取った際のデータの有効期限を秒で指定する
+     * -errorlog エラー時の出力を標準出力ではなく、指定したファイルに出力しますた。
+     * -debug Inputデータ文字列、実行した-trigger、実行したSQL、実行したユーザイベントコマンドを標準出力に出力する
      */
     public String[] startArgument = null; 
 
@@ -342,6 +344,12 @@ public class SetsunaMain {
                     System.out.println("          [指定例]");
                     System.out.println("           -errorlog \"setsuna_error.log\"");
                     System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -debug:Inputデータ文字列、実行した-trigger、実行したSQL、実行したユーザイベントコマンドを標準出力に出力する");
+                    System.out.println("        省略時はfalse");
+                    System.out.println("        [指定例]");
+                    System.out.println("         -debug true");
+                    System.out.println("  ");
                     System.exit(0);
                 }
             }
@@ -363,6 +371,7 @@ public class SetsunaMain {
             // エラーログ設定
             if (SetsunaStaticConfig.DEFAULT_SETSUNA_ERROR_LOG != null)
                 System.setErr(new PrintStream(SetsunaStaticConfig.DEFAULT_SETSUNA_ERROR_LOG));
+
 
             // ローカルモードで起動した際はtrueとなる
             SetsunaStaticConfig.SETSUNA_LOCAL_MODE = true;
