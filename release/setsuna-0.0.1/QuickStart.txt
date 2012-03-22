@@ -1,0 +1,14 @@
+(1).help表示
+java -jar setsuna.jar -help
+
+(2).Pingの結果を読み込ませて、どのようにSetsunaに格納されているかを確認
+ping -t localhost | grep --line-buffered TTL | java -jar setsuna.jar -stream ping
+
+(3).Pingの結果から応答に1ms以上かかっているデータを表示
+ping -t localhost | grep --line-buffered TTL | java -jar setsuna.jar -stream ping -trigger "COLUMN5 > 1"
+
+(4).Pingの結果から応答に1ms以上かかっているデータがきた場合に、直近データ5件の応答時間の平均が3ミリ秒以上の場合に表示(暗黙カラムC_TIMEを利用)
+ping -t localhost | grep --line-buffered TTL | java -jar setsuna.jar -stream ping -trigger "COLUMN5 > 1" -count true -query "select count(*) as cnt from (select avg(to_number(timetbl.column5)) as avgtime from (select COLUMN5 from ping order by C_TIME DESC limit 5) timetbl) t1 where t1.avgtime > 3"
+
+(5).Pingの結果から応答に1ms以上かかっているデータがきた場合に、直近データ5件の応答時間の平均が3ミリ秒以上の場合にSystemログにアラートを書き出します
+ping -t localhost | grep --line-buffered TTL | java -jar setsuna.jar -stream ping -trigger "COLUMN5 > 1" -count true -query "select count(*) as cnt from (select avg(to_number(timetbl.column5)) as avgtime from (select COLUMN5 from ping order by C_TIME DESC limit 5) timetbl) t1 where t1.avgtime > 3" -event "logger PingCheck time wait..."

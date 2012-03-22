@@ -1,0 +1,5 @@
+git add test <=ディレクトリやファイル
+
+git commit -m "ReadMe.txt update" <=ローカルに
+
+git push -u origin master <=ローカルはサーバへ
