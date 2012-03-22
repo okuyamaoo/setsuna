@@ -1,6 +1,3 @@
-
-
-
 [Setsunaとは]
 SetsunaはComplex Event Processing エンジンです。
 複数のデータストリームに対してリアルタイムにSQL記述で
