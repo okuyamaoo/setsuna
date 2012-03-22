@@ -1,0 +1,2 @@
+SetsunaはApache License, Version 2.0とします。
+ライセンスのもと自由な変更と配布が可能です。

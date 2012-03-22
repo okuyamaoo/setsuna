@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Project ROOT  -->
+<project name="setsuna" default="package" basedir=".">
+	<property name="project.title"  value="setsuna" />
+	<property name="src.dir"		value="src" />
+	<property name="build.dir"		value="classes" />
+	<property name="version"		value="0.0.2" />
+	<property name="lib.dir"	    value="lib"/>
+	<property name="msgpack.lib.dir" value="lib/msgpack"/>
+	<property name="makejar.dir"	value="makejar"/>
+	<property name="main.class"	value="setsuna.core.SetsunaMain"/>
+
+	<!-- Use Project Lib  -->
+	<path id="project.class.path">
+		<pathelement path = "."/>
+		<pathelement path = "classes"/>
+		<pathelement path = "lib/h2-1.3.164.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/ivy-2.1.0.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/javassist-3.15.0-GA.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/json-simple-1.1.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/log4j-1.2.16.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/msgpack-0.5.2-devel.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/msgpack-rpc-0.6.1-devel.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/netty-3.2.7.Final.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/slf4j-api-1.6.1.jar"/>
+		<pathelement path = "${msgpack.lib.dir}/slf4j-log4j12-1.6.1.jar"/>
+	</path>
+
+
+	<!-- clean Task  -->
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+	</target>
+
+	<!-- setup Task  -->
+	<target name="setup">
+		<mkdir dir="${build.dir}"/>
+	</target>
+
+	<!-- compile task  -->
+	<target name="compile" depends="clean, setup">
+		<javac debug="yes" srcdir="${src.dir}" destdir="${build.dir}" encoding="UTF-8" deprecation="true">
+			<classpath refid="project.class.path"/>
+		</javac>
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}" />
+		</copy>
+	</target>
+
+
+	<!-- jar make task  -->
+	<target name="jar" depends="compile">
+		<delete dir="${makejar.dir}/setsuna"/>
+		<copy todir="${makejar.dir}">
+			<fileset dir="${build.dir}" />
+		</copy>
+		<jar compress="yes" jarfile="setsuna.jar" basedir="${makejar.dir}" includes="**/*.class" >
+		  <manifest>
+		   <attribute name="Main-Class" value="${main.class}"/>
+		  </manifest>
+		</jar>
+	</target>
+</project>
+
+
+
+
