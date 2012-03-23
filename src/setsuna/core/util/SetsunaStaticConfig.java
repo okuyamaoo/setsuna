@@ -17,6 +17,10 @@ public class SetsunaStaticConfig {
     // SetsunaMainを利用したパイプインプット時の設定情報
     public volatile static String DEFAULT_PIPEINPUT_TABLE_NAME = "PIPE";
 
+    public volatile static int DATA_INPUT_OFFSET = 0;
+
+    public volatile static boolean ERROR_DATA_SKIP = false;
+
     public volatile static String[] DEFAULT_PIPEINPUT_COLUMN_LIST = null;
 
     public volatile static String DEFAULT_PIPEINPUT_SEP = " ";
@@ -76,10 +80,12 @@ public class SetsunaStaticConfig {
      * -db DBType 
      * -dbf DBTypeがファイルの場合のファイルの名前(省略時はsetsunadb固定)
      * -server サーバモードの指定 true=サーバモード、false=パイプ入力(デフォルトはこちら)
+     * -offset 入力されたデータを実際に取り込み開始するレコードの位置。ここで指定した数分読み込みをスキップする
      * -column 自身への標準入力をAdapterとして受ける場合に、その情報のカラム定義(標準ではCOLUMN1、COLUMN2、・・・と定義される)
      * -sep 自身への標準入力をAdapterとして受ける場合に、その情報をカラム情報とて扱うためにインプットを分解するセパレータ(標準は" ")
      * -sept 自身への標準入力をAdapterとして受ける場合に、その情報をカラム情報とて扱うためにインプットを分解するセパレータが2個以上続いた場合に1つとして扱う指定(標準では扱われない)
-     * -dst 自身への標準入力をAdapterとして受ける場合に、送られてくるデータを1データとして扱う区切りの指定 1=改行(デフォルト) 2=時間
+     * -dst 自身への標準入力をAdapt erとして受ける場合に、送られてくるデータを1データとして扱う区切りの指定 1=改行(デフォルト) 2=時間
+     * -skiperror カラム定義と異なるデータが入力された場合にExceptionを発行せずに無視する設定
      * -trigger columnname like ABC
      * -query select * from (select avg(to_number(COLUMN10)) as avgld from PipeAdapter order by COLUMN1 desc limit 10)) t1 where t1.avgld > 2
      * -count -query指定がcount文であることを指定 true=Count文
@@ -95,6 +101,24 @@ public class SetsunaStaticConfig {
 
 
         for (int i = 0; i < startArgument.length; i++) {
+
+            if (startArgument[i].trim().equals("-offset")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+
+                        SetsunaStaticConfig.DATA_INPUT_OFFSET = Integer.parseInt(startArgument[i+1].trim());
+                    }
+                }
+            }
+
+            if (startArgument[i].trim().equals("-skiperror")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+                        if (startArgument[i+1].trim().toUpperCase().equals("TRUE")) 
+                            SetsunaStaticConfig.ERROR_DATA_SKIP = true;
+                    }
+                }
+            }
 
 
             if (startArgument[i].trim().equals("-column")) {

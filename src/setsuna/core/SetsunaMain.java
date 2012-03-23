@@ -28,10 +28,12 @@ public class SetsunaMain {
      * -db DBType 
      * -dbf DBTypeがファイルの場合のファイルの名前(省略時はsetsunadb固定)
      * -server サーバモードの指定 true=サーバモード、false=パイプ入力(デフォルトはこちら)
-     * -column 自身への標準入力をAdapterとして受ける場合に、その情報のカラム定義(指定しない場合はではCOLUMN0、COLUMN1、・・・と定義される)
-     * -sep 自身への標準入力をAdapterとして受ける場合に、その情報をカラム単位に分解するためのセパレータ文字列(標準は" ")
-     * -sept 自身への標準入力をAdapterとして受ける場合に、その情報をカラム情報とて扱うためにインプットを分解するセパレータが2個以上続いた場合に1つとして扱う指定(標準では扱われない) 1=なにもしない 2=不要なセパレータを消す(デフォルト)
-     * -dst 自身への標準入力をAdapterとして受ける場合に、送られてくるデータを1データとして扱う区切りの指定 1=改行(デフォルト) 2=時間
+     * -offset 入力されたデータを実際に取り込み開始するレコードの位置。ここで指定した数分読み込みをスキップする
+     * -column 自身への標準入力・サーバモード入力をAdapterとして受ける場合に、その情報のカラム定義(指定しない場合はではCOLUMN0、COLUMN1、・・・と定義される)
+     * -sep 自身への標準入力・サーバモード入力をAdapterとして受ける場合に、その情報をカラム単位に分解するためのセパレータ文字列(標準は" ")
+     * -sept 自身への標準入力・サーバモード入力をAdapterとして受ける場合に、その情報をカラム情報とて扱うためにインプットを分解するセパレータが2個以上続いた場合に1つとして扱う指定(標準では扱われない) 1=なにもしない 2=不要なセパレータを消す(デフォルト)
+     * -dst 自身への標準入力・サーバモード入力をAdapterとして受ける場合に、送られてくるデータを1データとして扱う区切りの指定 1=改行(デフォルト) 2=時間
+     * -skiperror カラム定義と異なるデータが入力された場合にExceptionを発行せずに無視する設定
      * -target 標準入力以外のデータを監視したい場合に指定する。例えばsarなどの標準入力をどれかのプロセスが受けてそれに複数のプロセッシングを行いたい場合に名前を指定。指定する名前は対象のプロセスの-stream引数の値
      * -trigger columnname like ABC
      * -query select * from (select avg(to_number(COLUMN10)) as avgld from PipeAdapter order by COLUMN1 desc limit 10)) t1 where t1.avgld > 2
@@ -65,7 +67,7 @@ public class SetsunaMain {
                     System.out.println(" リアルタイムにデータの変動をキャッチし、処理を行うことが自動化できます。");
                     System.out.println(" ");
                     System.out.println(" SetsunaMainはエンジンのI/Fを良い扱いやすくしたプログラムです。");
-                    System.out.println(" 処理を行いたいデータのエンジンへの投入にパイプラインを採用しており");
+                    System.out.println(" 処理を行いたいデータのエンジンへの投入にパイプライン・サーバモード入力を採用しており");
                     System.out.println(" ダイレクトに他のスクリプトと組み合わせることが可能となっています。");
                     System.out.println(" ");
                     System.out.println(" また1台のサーバ内で複数のプロセスでSetsunaMainを利用した場合であっても");
@@ -87,10 +89,10 @@ public class SetsunaMain {
                     System.out.println("   標準的なコマンドからの出力 => Setsunaによるプロセッシング => イベントスクリプト実行");
                     System.out.println(" ");
                     System.out.println(" ");
-                    System.out.println(" SetsunaMainはかならずパイプからの標準入力が必要です。");
-                    System.out.println(" これは標準入力の1データ単位でデータ検知=>イベント実行が動くためです。");
+                    System.out.println(" SetsunaMainはかならずパイプからの標準入力か-serverモードでのデータ入力が必要です。");
+                    System.out.println(" これは入力データの1データ単位でデータ検知=>イベント実行が動くためです。");
                     System.out.println(" ");
-                    System.out.println(" パイプから投入したデータは全て自動的に作成されるSetsuna内のH2Database上のテーブルに格納されます。");
+                    System.out.println(" パイプ・サーバモードからの入力から投入したデータは全て自動的に作成されるSetsuna内のH2Database上のテーブルに格納されます。");
                     System.out.println(" データベースなどを準備する必要はありません。SetsunaMainを実行するだけです。");
                     System.out.println(" ");
                     System.out.println(" プロセッシングによりデータの変化を検知する部分には簡単な条件記述となるTriggerと、SQLによるQueryの");
@@ -176,9 +178,10 @@ public class SetsunaMain {
                     System.out.println("  --- 各オプション詳細一覧 ---");
                     System.out.println("  ----------------------------");
                     System.out.println("   ※特に重要なオプションは-server、-trigger -query -event -stream -sep -dstです");
+                    System.out.println("   ※デバッグ関係のオプションは-debug、-errorlogです");
                     System.out.println("  ");
                     //System.out.println(" -stream:標準入力から受取るデータの名前。ここで指定した名前で一時テーブルや、-target指定の領域が作成される");
-                    System.out.println(" -stream:標準入力から受取るデータの名前。ここで指定した名前で一時テーブルが作成されるため、-queryなどでこの指定値を利用する。");
+                    System.out.println(" -stream:標準入力・サーバモード入力から受取るデータの名前。ここで指定した名前で一時テーブルが作成されるため、-queryなどでこの指定値を利用する。");
                     System.out.println("        **省略可能**");
                     System.out.println("        ※省略した場合は\"pipe\"となる");
                     System.out.println("        [指定例]");
@@ -214,14 +217,16 @@ public class SetsunaMain {
                     System.out.println("            -bindport 10222");
                     System.out.println("  ");
                     System.out.println("  ");
-                    System.out.println(" -atime:標準入力から受取るデータが一時テーブル上に存在する有効期限を秒で指定。");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -atime:標準入力・サーバモード入力から受取るデータが一時テーブル上に存在する有効期限を秒で指定。");
                     System.out.println("        **省略可能**");
                     System.out.println("        ※省略した場合は600秒");
                     System.out.println("        [指定例]");
                     System.out.println("          -atime 3600");
                     System.out.println("  ");
                     System.out.println("  ");
-                    System.out.println(" -column:標準入力から受取る情報をデータベースの一時テーブル情報にマッピング。");
+                    System.out.println(" -column:標準入力・サーバモード入力から受取る情報をデータベースの一時テーブル情報にマッピング。");
                     System.out.println("         するためのカラム情報の定義を指定。カラム名を半角スペース区切りで定義する");
                     System.out.println("         **省略可能**");
                     System.out.println("         ※省略した場合はCOLUMN0、COLUMN1、・・・と自動定義される");
@@ -251,6 +256,26 @@ public class SetsunaMain {
                     System.out.println("           CRLF or LF");
                     System.out.println("       2 = 時間");
                     System.out.println("           標準入力からのインプットから次のインプットまでの間が100ミリ秒以上ある場合は区切りとする指定");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -skiperror:カラム定義の合わない入力データがきた場合にExceptionを発行せずに無視する");
+                    System.out.println("            **省略可能**");
+                    System.out.println("            ※省略した場合は定義違いの場合Exception発行してSetsunaを停止");
+                    System.out.println("            [指定例]");
+                    System.out.println("             -skiperror true");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -offset:データ読み込み時の開始位置。");
+                    System.out.println("         標準入力モード時や、サーバモード時に送り込まれたデータを指定されたデータ数");
+                    System.out.println("         スキップ(読み込まない)してから始めて内部DBへの格納を開始する");
+                    System.out.println("         利用イメージは読み込まれるデータの最初レコードに空白や、本来読み込みたいデータと異なる");
+                    System.out.println("         フォーマットが存在した場合に利用する");
+                    System.out.println("         このオプションを利用する場合は必ず-columnオプションも設定する必要がある");
+                    System.out.println("         これはデータを格納するテーブル定義を作成する必要があるためである");
+                    System.out.println("         **省略可能**");
+                    System.out.println("         [設定例]");
+                    System.out.println("          -offset 3 -column \"ip time method result\"");
+                    System.out.println("          ※投入されたデータを3レコードスキップ後、-column指定のカラム定義で取り込む");
                     System.out.println("  ");
                     System.out.println("  ");
                     /*System.out.println(" -target:標準入力以外の別プロセスが入力しているStreamデータを監視したい場合に指定する");
@@ -339,6 +364,8 @@ public class SetsunaMain {
                     System.out.println("           -argtype JSON");
                     System.out.println("  ");
                     System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println("  ");
                     System.out.println(" -errorlog:Setsuna自身のエラー出力をコンソールではなく、指定したファイルに出力する");
                     System.out.println("           出力先のファイル名を指定する");
                     System.out.println("          [指定例]");
@@ -376,6 +403,11 @@ public class SetsunaMain {
             if (SetsunaStaticConfig.DEFAULT_SETSUNA_ERROR_LOG != null)
                 System.setErr(new PrintStream(SetsunaStaticConfig.DEFAULT_SETSUNA_ERROR_LOG));
 
+            if (SetsunaStaticConfig.DATA_INPUT_OFFSET != 0) {
+                if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_COLUMN_LIST == null) {
+                    throw new IllegalArgumentException("Please, use -column option");
+                }
+            }
 
             // ローカルモードで起動した際はtrueとなる
             SetsunaStaticConfig.SETSUNA_LOCAL_MODE = true;
