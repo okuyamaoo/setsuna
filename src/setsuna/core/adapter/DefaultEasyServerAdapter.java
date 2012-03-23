@@ -142,7 +142,7 @@ public class DefaultEasyServerAdapter implements IAdapter  {
             String sep ="";
             for (int idx = 0; idx < columnList.length; idx++) {
                 debugData.append(sep);
-                debugData.append("[0]=\"" + data[idx] + "\"");
+                debugData.append("[" + idx + "]=\"" + data[idx] + "\"");
                 sep = ",";
                 retMap.put(this.columnList[idx], data[idx]);
             }

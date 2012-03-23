@@ -33,6 +33,7 @@ public class QueryExecuteScript implements IScript {
         String[] columnNameList = null;
         StringBuilder retStrBuf = new StringBuilder();
         try {
+            SystemUtil.debug("-eventquery=[" + this.query + "]");
             ResultSet resultSet = this.executeQuery(new ArrayList());
             ResultSetMetaData metaData = resultSet.getMetaData();
             columnNameList = new String[metaData.getColumnCount()];
