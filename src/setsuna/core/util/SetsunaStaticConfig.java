@@ -56,7 +56,7 @@ public class SetsunaStaticConfig {
 
     public volatile static String DEFAULT_SETSUNA_ERROR_LOG = null;
 
-    public volatile static boolean DEBUG_SETSUNA = false;
+    public volatile static int DEBUG_SETSUNA = 0; //0=Debugなし、1=Debug&output、2=DebugOnly
 
 
     public volatile static boolean SETSUNA_LOCAL_MODE = false;
@@ -264,10 +264,15 @@ public class SetsunaStaticConfig {
             if (startArgument[i].trim().equals("-debug")) {
                 if (startArgument.length > (i+1)) {
                     if (startArgument[i+1] != null) {
-                        if (startArgument[i+1].trim().toUpperCase().equals("TRUE")) 
-                            SetsunaStaticConfig.DEBUG_SETSUNA = true;
+                        if (startArgument[i+1].trim().toUpperCase().equals("ON")) {
+                            SetsunaStaticConfig.DEBUG_SETSUNA = 1;
+                        }
+                        if (startArgument[i+1].trim().toUpperCase().equals("ONLY")) {
+                            SetsunaStaticConfig.DEBUG_SETSUNA = 2;
+                        }
                     }
                 }
+
             }
 
 

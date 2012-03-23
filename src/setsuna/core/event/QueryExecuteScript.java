@@ -63,7 +63,7 @@ public class QueryExecuteScript implements IScript {
             }
             retStrBuf.append("]");
             resultSet.close();
-            System.out.println(retStrBuf.toString());
+            SystemUtil.printout(retStrBuf.toString());
         } catch (Exception e) {
             throw e;
         }

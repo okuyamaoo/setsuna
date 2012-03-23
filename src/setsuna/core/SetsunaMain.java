@@ -42,7 +42,7 @@ public class SetsunaMain {
      * -stream inputで受け取った際のデータStreamの名前。内部ではテーブル名などに利用(指定がない場合は"pipe"となる)
      * -atime inputで受け取った際のデータの有効期限を秒で指定する
      * -errorlog エラー時の出力を標準出力ではなく、指定したファイルに出力しますた。
-     * -debug Inputデータ文字列、実行した-trigger、実行したSQL、実行したユーザイベントコマンドを標準出力に出力する
+     * -debug Inputデータ文字列、実行した-trigger、実行したSQL、実行したユーザイベントコマンドを標準出力に出力する(on指定=でdebugとSetsunaの出力両方、only=デバッグのみ出力)
      */
     public String[] startArgument = null; 
 
@@ -346,9 +346,13 @@ public class SetsunaMain {
                     System.out.println("  ");
                     System.out.println("  ");
                     System.out.println(" -debug:Inputデータ文字列、実行した-trigger、実行したSQL、実行したユーザイベントコマンドを標準出力に出力する");
-                    System.out.println("        省略時はfalse");
+                    System.out.println("        指定出来る種類は2種類あり、onとonlyである。");
+                    System.out.println("        on=デバッグ出力とSetsunaそのもののイベントの出力も混在して出力される");
+                    System.out.println("        only=デバッグ出力のみ出力。Setsunaそのもののイベントの出力はでない");
+                    System.out.println("        省略時はdebugなし");
                     System.out.println("        [指定例]");
-                    System.out.println("         -debug true");
+                    System.out.println("         -debug on");
+                    System.out.println("         -debug only");
                     System.out.println("  ");
                     System.exit(0);
                 }

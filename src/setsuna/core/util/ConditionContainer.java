@@ -65,7 +65,7 @@ public class ConditionContainer {
             }*/
 
             for (int idx = 0; idx < this.preparedStatementList.length; idx++) {
-                SystemUtil.debug("-query debug=[" + this.queryList[idx] + "]");
+                SystemUtil.debug("-query SQL=[" + this.queryList[idx] + "]");
                 ResultSet resultSet = this.preparedStatementList[idx].executeQuery();
                 if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TYPE == 1) {
                     if (!resultSet.next()) {

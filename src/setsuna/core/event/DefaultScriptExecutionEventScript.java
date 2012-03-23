@@ -92,7 +92,7 @@ public class DefaultScriptExecutionEventScript implements IScript {
                 argStr.append("\"");
             }
             this.runtime = Runtime.getRuntime();
-            SystemUtil.debug("Execution UserEvent debug=[" + executeScriptStr + " " + argStr.toString() + "]");
+            SystemUtil.debug("Execution UserEvent=[" + executeScriptStr + " " + argStr.toString() + "]");
             this.process = this.runtime.exec(executeScriptStr + " " + argStr.toString());
         } catch (Exception e) {
             throw e;

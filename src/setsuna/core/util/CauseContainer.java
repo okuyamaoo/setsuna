@@ -30,6 +30,7 @@ public class CauseContainer {
 
     private List paramList = null;
 
+    private String useTypeString = "";
 
     static {
         causeTypeMap = new ConcurrentHashMap(10, 8, 64);
@@ -81,6 +82,7 @@ public class CauseContainer {
         Map causeMap = new HashMap(3);
         causeMap.put(colKey, buildList[0].toUpperCase());
         causeMap.put(typeKey, (Integer)causeTypeMap.get(buildList[1].toUpperCase()));
+        this.useTypeString = buildList[1].toUpperCase();
 
         StringBuilder causeValueBuf = new StringBuilder();
         String sep = "";
@@ -100,6 +102,7 @@ public class CauseContainer {
         causeMap.put(colKey, columnName.toUpperCase());
         causeMap.put(typeKey, (Integer)causeTypeMap.get(type.toUpperCase()));
         causeMap.put(causeKey, causeValue);
+        this.useTypeString = type;
 
         this.paramList.add(causeMap);
     }
@@ -132,7 +135,7 @@ public class CauseContainer {
     protected boolean executeCause(String value, Integer type, String causeValue) {
         if (value == null || type == null) return false;
 
-        SystemUtil.debug("-trigger debug=[" + value + " " + value.equals(causeValue) + " " + causeValue + "]");
+        SystemUtil.debug("-trigger Query=[" + value + " " + this.useTypeString + " " + causeValue + "]");
         switch (type.intValue()) {
             case 1 : 
 

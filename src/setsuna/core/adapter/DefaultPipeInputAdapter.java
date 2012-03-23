@@ -130,7 +130,7 @@ public class DefaultPipeInputAdapter implements IAdapter {
                 retMap = new LinkedHashMap();
 
                 // デバッグ
-                SystemUtil.debug("Pipe Input debug=[" + this.testReadLine + "]");
+                SystemUtil.debug("Pipe Input=[" + this.testReadLine + "]");
                 String[] splitData = this.testReadLine.split(sep);
                 for (int idx = 0; idx < columnList.length; idx++) {
                     retMap.put(this.columnList[idx], splitData[idx]);
@@ -163,7 +163,7 @@ public class DefaultPipeInputAdapter implements IAdapter {
                 }
 
                 // デバッグ
-                SystemUtil.debug("Pipe Input Line=[" + readLine + "]");
+                SystemUtil.debug("Pipe Input=[" + readLine + "]");
 
                 // セパレート文字列の連続つぶす場合の処理
                 while (true) {

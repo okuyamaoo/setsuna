@@ -146,7 +146,7 @@ public class DefaultEasyServerAdapter implements IAdapter  {
                 sep = ",";
                 retMap.put(this.columnList[idx], data[idx]);
             }
-            SystemUtil.debug("Server Input debug=[" + debugData + "]");
+            SystemUtil.debug("Server Input=[" + debugData + "]");
         } catch (Exception e) {
             //System.err.println("readLine=" + readLine);
             //throw new SetsunaException("Adapter read string =[" + readLine + "]", e);
