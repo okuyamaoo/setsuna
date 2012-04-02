@@ -13,6 +13,8 @@ import org.h2.tools.Server;
 
 /**
  * コマンドライン用Setsunaラッパー.<br>
+ * 1プロセス1イベントになる.<br>
+ * お手軽イベントプロセス用.<br>
  *
  * @author T.Okuyama
  */
@@ -27,6 +29,8 @@ public class SetsunaMain {
      * --e EventScriptDir 
      * -db DBType 
      * -dbf DBTypeがファイルの場合のファイルの名前(省略時はsetsunadb固定)
+     * -masterport スタンドアロンモードで起動する場合、マスターサーバとして起動するためのチェックに利用するポート番号
+     * -dbport スタンドアロンモードで起動する場合の内部DBのポート番号
      * -server サーバモードの指定 true=サーバモード、false=パイプ入力(デフォルトはこちら)
      * -offset 入力されたデータを実際に取り込み開始するレコードの位置。ここで指定した数分読み込みをスキップする
      * -column 自身への標準入力・サーバモード入力をAdapterとして受ける場合に、その情報のカラム定義(指定しない場合はではCOLUMN0、COLUMN1、・・・と定義される)
@@ -381,6 +385,25 @@ public class SetsunaMain {
                     System.out.println("         -debug on");
                     System.out.println("         -debug only");
                     System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -masterport:スタンドアロンモードで起動する場合、マスターサーバとして起動するためのチェックに利用するポート番号");
+                    System.out.println("             ここで指定したポート番号で起動してるサーバがいなければ、マスターとなる。");
+                    System.out.println("             注意!!:この指定をおこなう場合は同じサーバ内で起動するSetsunaは全て同じ設定を適応する必要がある。");
+                    System.out.println("             数値で指定する");
+                    System.out.println("             **省略可能**");
+                    System.out.println("             ※省略した場合は10027となる");
+                    System.out.println("             [指定例]");
+                    System.out.println("             -masterport 9999");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -dbport:スタンドアロンモードで起動する場合の内部DBのポート番号");
+                    System.out.println("         数値で指定する");
+                    System.out.println("         注意!!:この指定をおこなう場合は同じサーバ内で起動するSetsunaは全て同じ設定を適応する必要がある。");
+                    System.out.println("         **省略可能**");
+                    System.out.println("         ※省略した場合は9092となる");
+                    System.out.println("         [指定例]");
+                    System.out.println("         -dbport 9999");
+                    System.out.println("  ");
                     System.exit(0);
                 }
             }
@@ -418,13 +441,18 @@ public class SetsunaMain {
             try {
                 // サーバソケットを生成してバインドに成功すれば親となる
                 InetSocketAddress bindAddress = null;
-                bindAddress = new InetSocketAddress("127.0.0.1", 10027);
+                bindAddress = new InetSocketAddress("127.0.0.1", SetsunaStaticConfig.DEFAULT_MASTER_CHECK_PORT);
                 serverSocket = new ServerSocket();
                 serverSocket.bind(bindAddress, 100);
                 SetsunaStaticConfig.SETSUNA_LOCAL_SERVER = true;
-                // DBサーバを起動
-                server = Server.createTcpServer().start();
+                // DBサーバを起動/マスターでのみ起動
+                String[] dbServerParam = new String[2];
+                dbServerParam[0] = "-tcpPort";
+                dbServerParam[1] = new Integer(SetsunaStaticConfig.DEFAULT_DB_PORT).toString();
+                server = Server.createTcpServer(dbServerParam).start();
+
                 SetsunaStaticConfig.STREAM_DATABASE_URI = SetsunaStaticConfig.STREAM_DATABASE_LOCAL_SERVER_URI;
+                System.out.println("1="+ SetsunaStaticConfig.STREAM_DATABASE_URI);
             } catch(Exception chkE) {
 
                 // 既に親が存在する

@@ -8,6 +8,7 @@ package setsuna.core.util;
  */
 public class SetsunaStaticConfig {
 
+
     public volatile static String STREAM_DATABASE_DRIVER_NAME = "org.h2.Driver";
 
     public volatile static String STREAM_DATABASE_URI = "jdbc:h2:streamdb;MULTI_THREADED=TRUE;DB_CLOSE_DELAY=-1";
@@ -20,6 +21,10 @@ public class SetsunaStaticConfig {
     public volatile static int DATA_INPUT_OFFSET = 0;
 
     public volatile static boolean ERROR_DATA_SKIP = false;
+
+    public volatile static int DEFAULT_MASTER_CHECK_PORT = 10027;
+
+    public volatile static int DEFAULT_DB_PORT = 9092;
 
     public volatile static String[] DEFAULT_PIPEINPUT_COLUMN_LIST = null;
 
@@ -78,6 +83,8 @@ public class SetsunaStaticConfig {
      * --e EventScriptDir 
      * -adapter Adapterのクラス名を指定する(フルクラス名)
      * -db DBType 
+     * -masterport スタンドアロンモードで起動する場合、マスターサーバとして起動するためのチェックに利用するポート番号
+     * -dbport スタンドアロンモードで起動する場合の内部DBのポート番号
      * -dbf DBTypeがファイルの場合のファイルの名前(省略時はsetsunadb固定)
      * -server サーバモードの指定 true=サーバモード、false=パイプ入力(デフォルトはこちら)
      * -offset 入力されたデータを実際に取り込み開始するレコードの位置。ここで指定した数分読み込みをスキップする
@@ -101,6 +108,28 @@ public class SetsunaStaticConfig {
 
 
         for (int i = 0; i < startArgument.length; i++) {
+
+            if (startArgument[i].trim().equals("-masterport")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+
+                        SetsunaStaticConfig.DEFAULT_MASTER_CHECK_PORT = Integer.parseInt(startArgument[i+1].trim());
+                    }
+                }
+            }
+
+            if (startArgument[i].trim().equals("-dbport")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+
+                        SetsunaStaticConfig.DEFAULT_DB_PORT = Integer.parseInt(startArgument[i+1].trim());
+                        SetsunaStaticConfig.STREAM_DATABASE_LOCAL_SERVER_URI = "jdbc:h2:tcp://localhost:" + SetsunaStaticConfig.DEFAULT_DB_PORT + "/mem:streamdb;MULTI_THREADED=TRUE;DB_CLOSE_DELAY=-1";
+                        SetsunaStaticConfig.STREAM_DATABASE_LOCAL_CLIENT_URI = "jdbc:h2:tcp://localhost:" + SetsunaStaticConfig.DEFAULT_DB_PORT + "/mem:streamdb;MULTI_THREADED=TRUE;DB_CLOSE_DELAY=-1";
+                    }
+                }
+            }
+
+
 
             if (startArgument[i].trim().equals("-offset")) {
                 if (startArgument.length > (i+1)) {

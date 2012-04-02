@@ -23,6 +23,7 @@ public class StreamDatabaseConnectManager {
     public static Connection getConnection(boolean autoCommit) throws Exception {
         Connection conn = null;
         try {
+            System.out.println(SetsunaStaticConfig.STREAM_DATABASE_URI);
             conn = DriverManager.getConnection(SetsunaStaticConfig.STREAM_DATABASE_URI);
         } catch(Exception e) {
             throw e;
