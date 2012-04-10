@@ -124,6 +124,16 @@ public class ConditionContainer {
                 // table, column, overvalue
                 sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
                 sql = "select * from (" + sql + ") where avgval <  " + params[2];
+            } else if (convertTargetStr.indexOf("over_value(") == 0) {
+
+                // table, column, overvalue
+                sql = "select max(to_number(" +  params[1] + ")) as maxval from " + params[0];
+                sql = "select * from (" + sql + ") where maxval >  " + params[2];
+            } else if (convertTargetStr.indexOf("below_value(") == 0) {
+
+                // table, column, overvalue
+                sql = "select min(to_number(" +  params[1] + ")) as minval from " + params[0];
+                sql = "select * from (" + sql + ") where minval  < " + params[2];
             } else {
                 // Unknown pattern
                 throw new Exception("Unknown -esayquery pattern");                
