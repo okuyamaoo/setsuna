@@ -452,7 +452,7 @@ public class SetsunaMain {
                 server = Server.createTcpServer(dbServerParam).start();
 
                 SetsunaStaticConfig.STREAM_DATABASE_URI = SetsunaStaticConfig.STREAM_DATABASE_LOCAL_SERVER_URI;
-                System.out.println("1="+ SetsunaStaticConfig.STREAM_DATABASE_URI);
+
             } catch(Exception chkE) {
 
                 // 既に親が存在する

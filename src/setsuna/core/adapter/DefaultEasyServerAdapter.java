@@ -18,7 +18,7 @@ import setsuna.core.util.*;
  *
  * @author T.Okuyama
  */
-public class DefaultEasyServerAdapter implements IAdapter  {
+public class DefaultEasyServerAdapter extends AbstractDefaultAdapter implements IAdapter  {
 
     private String[] columnList = null;
     private long arrivalTime = 0L;
@@ -146,7 +146,10 @@ public class DefaultEasyServerAdapter implements IAdapter  {
                 sep = ",";
                 retMap.put(this.columnList[idx], data[idx]);
             }
-            SystemUtil.debug("Server Input=[" + debugData + "]");
+            super.debug("Server Input=[" + debugData + "]");
+            // -output指定
+            super.outputAdapterData(data);
+
         } catch (Exception e) {
             //System.err.println("readLine=" + readLine);
             //throw new SetsunaException("Adapter read string =[" + readLine + "]", e);

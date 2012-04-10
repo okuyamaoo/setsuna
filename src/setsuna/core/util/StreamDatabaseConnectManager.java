@@ -24,7 +24,7 @@ public class StreamDatabaseConnectManager {
         Connection conn = null;
         
         try {
-            System.out.println(SetsunaStaticConfig.STREAM_DATABASE_URI);
+
             conn = DriverManager.getConnection(SetsunaStaticConfig.STREAM_DATABASE_URI);
         } catch(Exception e) {
             throw e;

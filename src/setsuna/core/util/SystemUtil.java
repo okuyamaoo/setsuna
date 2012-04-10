@@ -10,6 +10,14 @@ import java.util.*;
  */
 public class SystemUtil {
 
+    public static void outputAdapterData(String adapterData) {
+        System.out.println(adapterData);
+    }
+
+    public static void outputAdapterData(String[] adapterData) {
+        System.out.println(adapterData);
+    }
+
     public static void debug(Object obj) {
         if (SetsunaStaticConfig.DEBUG_SETSUNA > 0) 
             System.out.println("Debug : " + new Date() + " - - " + obj);
