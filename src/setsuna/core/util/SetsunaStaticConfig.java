@@ -42,6 +42,8 @@ public class SetsunaStaticConfig {
 
     public volatile static String DEFAULT_PIPEINPUT_QUERY_CONDITION = null;
 
+    public volatile static String DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION = null;
+
     public volatile static String DEFAULT_PIPEINPUT_DEFAULT_EXECUTION_EVENT = "setsuna.core.event.DefaultScriptExecutionEventScript";
 
     public volatile static String DEFAILT_PIPEINPUT_USER_EVENT_SCRIPT = null;
@@ -66,6 +68,8 @@ public class SetsunaStaticConfig {
     public volatile static String DEFAULT_SETSUNA_ERROR_LOG = null;
 
     public volatile static int DEBUG_SETSUNA = 0; //0=Debugなし、1=Debug&output、2=DebugOnly
+
+    public volatile static boolean OUTPUT_ADAPTER_DATA = false; // Adapterのデータを外部出力(未実装)
 
 
     public volatile static boolean SETSUNA_LOCAL_MODE = false;
@@ -212,6 +216,16 @@ public class SetsunaStaticConfig {
             }
 
 
+            if (startArgument[i].trim().equals("-esayquery")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+
+                        SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION = startArgument[i+1];
+                    }
+                }
+            }
+            
+            
             if (startArgument[i].trim().equals("-event")) {
                 if (startArgument.length > (i+1)) {
                     if (startArgument[i+1] != null) {
@@ -329,6 +343,7 @@ public class SetsunaStaticConfig {
             }
 
 
+
             if (startArgument[i].trim().equals("-adapter")) {
                 if (startArgument.length > (i+1)) {
                     if (startArgument[i+1] != null) {
@@ -337,6 +352,7 @@ public class SetsunaStaticConfig {
                     }
                 }
             }
+            
 
         }
     }

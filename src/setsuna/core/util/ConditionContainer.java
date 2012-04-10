@@ -102,4 +102,36 @@ public class ConditionContainer {
             }
         }
     }
+
+
+    public static String parseEsayQuery(String queryString) throws Exception {
+        String sql = null;
+        try {
+            String convertTargetStr = queryString.trim().replaceAll(" ","").toLowerCase();
+
+            int start = queryString.indexOf("(");
+            int end = queryString.lastIndexOf(")");
+            String queryParamStr = queryString.substring(start + 1, end);
+            String[] params = queryParamStr.split(",");
+
+            if (convertTargetStr.indexOf("avg_over(") == 0) {
+
+                // table, column, overvalue
+                sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
+                sql = "select * from (" + sql + ") where avgval >  " + params[2];
+            } else if (convertTargetStr.indexOf("avg_below(") == 0) {
+
+                // table, column, overvalue
+                sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
+                sql = "select * from (" + sql + ") where avgval <  " + params[2];
+            } else {
+                // Unknown pattern
+                throw new Exception("Unknown -esayquery pattern");                
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+        System.out.println(sql);
+        return sql;
+    }
 }

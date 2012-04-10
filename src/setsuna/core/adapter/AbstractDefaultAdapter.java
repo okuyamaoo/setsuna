@@ -10,16 +10,19 @@ import setsuna.core.util.*;
  */
 public abstract class AbstractDefaultAdapter {
 
+    public volatile boolean outputFlg = SetsunaStaticConfig.OUTPUT_ADAPTER_DATA;
 
     protected void debug(String data) {
         SystemUtil.debug(data);
     }
 
     protected void outputAdapterData(String data) {
-        SystemUtil.outputAdapterData(data);
+        if(outputFlg)
+            SystemUtil.outputAdapterData(data);
     }
 
     protected void outputAdapterData(String[] data) {
-        SystemUtil.outputAdapterData(data);
+        if(outputFlg)
+            SystemUtil.outputAdapterData(data);
     }
 }

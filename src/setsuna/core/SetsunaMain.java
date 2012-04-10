@@ -538,14 +538,19 @@ public class SetsunaMain {
         ConditionContainer conditionContainer = null;
         AbstractCoreEngine coreQueryEngine = null;
         try {
-            if(SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE != null || SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION  != null) {
+            if(SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE != null || SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION  != null || SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION  != null) {
                 if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE != null) {
                     causeContainer = new CauseContainer();
                     causeContainer.add2BuildCause(SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE);
                 }
 
-                if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION != null) {
+                if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION == null && SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION != null) {
                     conditionContainer = new ConditionContainer(SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION);
+                }
+
+                if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION != null) {
+                    String esayQuerySQL = ConditionContainer.parseEsayQuery(SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION);
+                    conditionContainer = new ConditionContainer(esayQuerySQL);
                 }
             }
 
