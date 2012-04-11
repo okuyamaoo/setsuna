@@ -104,6 +104,16 @@ public class ConditionContainer {
     }
 
 
+    /**
+     * 簡易型クエリーのパーサー.<br>
+     * "avg_over":特定のカラムの平均が指定値以上か調べる(table, column, overvalue)
+     * "avg_below":特定のカラムの平均が指定値以下か調べる(table, column, belowvalue)
+     * "over_value":特定のカラムの最大値が指定値以上か調べる(table, column, overvalue)
+     * "below_value":特定のカラムの最小値が指定値以下か調べる(table, column, belowvalue)
+     * "avg_more_over":特定のカラムの平均の指定倍以上の値が存在するか調べる(table, column, multiple_number)
+     *
+     *
+     */
     public static String parseEsayQuery(String queryString) throws Exception {
         String sql = null;
         try {
@@ -121,7 +131,7 @@ public class ConditionContainer {
                 sql = "select * from (" + sql + ") where avgval >  " + params[2];
             } else if (convertTargetStr.indexOf("avg_below(") == 0) {
 
-                // table, column, overvalue
+                // table, column, belowvalue
                 sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
                 sql = "select * from (" + sql + ") where avgval <  " + params[2];
             } else if (convertTargetStr.indexOf("over_value(") == 0) {
@@ -131,9 +141,14 @@ public class ConditionContainer {
                 sql = "select * from (" + sql + ") where maxval >  " + params[2];
             } else if (convertTargetStr.indexOf("below_value(") == 0) {
 
-                // table, column, overvalue
+                // table, column, belowvalue
                 sql = "select min(to_number(" +  params[1] + ")) as minval from " + params[0];
                 sql = "select * from (" + sql + ") where minval  < " + params[2];
+            } else if (convertTargetStr.indexOf("avg_more_over(") == 0) {
+
+                // table, column, multiple_number
+                sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
+                sql = "select * from (" + params[0]+ ") where params[1] >  " + "select (avg(to_number(" +  params[1] + ")) * " + params[2] + ") as val from " + params[0];
             } else {
                 // Unknown pattern
                 throw new Exception("Unknown -esayquery pattern");                
