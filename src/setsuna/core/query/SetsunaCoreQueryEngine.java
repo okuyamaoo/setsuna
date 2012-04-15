@@ -72,7 +72,7 @@ public class SetsunaCoreQueryEngine extends AbstractCoreEngine {
                         } else {
 
                             // Query実行
-                            if (this.condition.checkConditionMatchRecode()) {
+                            if (this.condition.checkConditionMatchRecode(adapterData)) {
 
                                 EngineJoinQueueFolder.putEventInputQueue(myName, adapterData); // TODO:ResultSetはいるのか？
                             }
