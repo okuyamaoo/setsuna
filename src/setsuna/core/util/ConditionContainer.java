@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import java.util.regex.*;
 
 /**
  * Query指定のコンテナクラス<br>
@@ -18,6 +19,8 @@ public class ConditionContainer {
     protected Connection conn = null;
 
     protected PreparedStatement[] preparedStatementList = null;
+
+    protected boolean replaceQueryParamFlg = false;
 
 
     public ConditionContainer(String query) throws Exception {
@@ -44,6 +47,11 @@ public class ConditionContainer {
             this.preparedStatementList = new PreparedStatement[this.queryList.length];
 
             for (int idx = 0; idx < this.queryList.length; idx++) {
+                Pattern p = Pattern.compile("%.*%");
+                Matcher m = p.matcher(this.queryList[idx]);
+                if (m.find()) {
+                    this.replaceQueryParamFlg = true;
+                }
 
                 this.preparedStatementList[idx] = this.conn.prepareStatement(this.queryList[idx]);
             }
