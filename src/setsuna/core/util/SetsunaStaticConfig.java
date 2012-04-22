@@ -99,6 +99,7 @@ public class SetsunaStaticConfig {
      * -skiperror カラム定義と異なるデータが入力された場合にExceptionを発行せずに無視する設定
      * -trigger columnname like ABC
      * -query select * from (select avg(to_number(COLUMN10)) as avgld from PipeAdapter order by COLUMN1 desc limit 10)) t1 where t1.avgld > 2
+     * -easyquery SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。実行可能な関数はavg_over、avg_below、over_value、below_value、avg_more_over
      * -count -query指定がcount文であることを指定 true=Count文
      * -event イベントで実行するスクリプト(シェルやbatなど)
      * -eventquery イベントを-event指定でのシェルやバッチではなく、任意のSQLを実行させその結果をJSONで画面に出力したい場合はこのオプションにSQLを記述する。
@@ -241,7 +242,7 @@ public class SetsunaStaticConfig {
             }
 
 
-            if (startArgument[i].trim().equals("-esayquery")) {
+            if (startArgument[i].trim().equals("-easyquery")) {
                 if (startArgument.length > (i+1)) {
                     if (startArgument[i+1] != null) {
 

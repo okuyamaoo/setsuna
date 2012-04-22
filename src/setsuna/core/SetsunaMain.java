@@ -42,6 +42,7 @@ public class SetsunaMain {
      * -trigger columnname like ABC
      * -query select * from (select avg(to_number(COLUMN10)) as avgld from PipeAdapter order by COLUMN1 desc limit 10)) t1 where t1.avgld > 2
      * -count -query指定がcount文であることを指定 true=Count文
+     * -easyquery SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。実行可能な関数はavg_over、avg_below、over_value、below_value、avg_more_over
      * -event イベントで実行するスクリプト(シェルやbatなど)
      * -eventquery イベントを-event指定でのシェルやバッチではなく、任意のSQLを実行させその結果をJSONで標準出力に出力したい場合はこのオプションにSQLを記述する。
      * -argtype ユーザイベントへの引数のフォーマット(JSON, ",")
@@ -338,6 +339,19 @@ public class SetsunaMain {
                     System.out.println("        この指定をおこなった場合は結果が1件以上の場合にユーザスクリプトが実行されるようになる");
                     System.out.println("        [指定例]");
                     System.out.println("         -count true");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -easyquery:SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。");
+                    System.out.println("            現在利用可能な関数とその機能は以下");
+                    System.out.println("            [関数一覧]");
+                    System.out.println("            'avg_over':特定のカラムの平均が指定値以上か調べる(table, column, overvalue)");
+                    System.out.println("            'avg_below':特定のカラムの平均が指定値以下か調べる(table, column, belowvalue)");
+                    System.out.println("            'over_value':特定のカラムの最大値が指定値以上か調べる(table, column, overvalue)");
+                    System.out.println("            'below_value':特定のカラムの最小値が指定値以下か調べる(table, column, belowvalue)");
+                    System.out.println("            'avg_more_over':特定のカラムの平均の指定倍以上の値が存在するか調べる(table, column, multiple_number)");
+                    System.out.println("            [指定例]");
+                    System.out.println("             -easyquery avg_over(pipe, column4, 3)");
+                    System.out.println("             ※内部で実際に実行されているSQLは-debug onで確認可能");
                     System.out.println("  ");
                     System.out.println("  ");
                     System.out.println(" -event:イベントで実行するスクリプト(シェルやbatなど)を指定");

@@ -206,7 +206,6 @@ public class ConditionContainer {
         } catch (Exception e) {
             throw e;
         }
-        System.out.println(sql);
         return sql;
     }
 }
