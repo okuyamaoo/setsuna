@@ -1,6 +1,47 @@
 [2012/XX/XX - Version0.0.3 - リリース]
--dbport追加
--masterport追加
+・-dbport追加
+・-masterport追加
+・-queryで指定するSQL内でAdapterから投入された直近のデータを条件として利用できる機能を追加
+  利用イメージはSQL内のAdapterからのデータで置き換えたい箇所にカラム名を特定のフォーマット(%カラム名%)で
+  指定するとその部分がSQL実行時には、Adapterからの直近のデータで置換されて実行される。
+  1つのSQL内でいくつでも指定可能。
+
+  指定及び、実行イメージは以下となる
+   1.Adapterから以下のデータが来た場合
+    Reply from 192.168.11.1: bytes=32 time=1ms TTL=64
+   2.内部には以下のテーブル定義で自動的に格納される。
+    ※DBテーブル内のデータを"カラム名:データ"のフォーマットで以下に表す   
+     COLUMN0:Reply
+     COLUMN1:from
+     COLUMN2:192.168.11.1:
+     COLUMN3:bytes=32
+     COLUMN4:time=1ms
+     COLUMN5:TTL=64
+   3.以下のSQLを指定(Where句の指定の部分に%Column4%を指定
+     -query "select * from pipe where to_number(column4) > to_number(%Column4%)"
+   4.実際には以下のSQLが実行される
+     select * from pipe where to_number(column4) > to_number('time=1ms')
+   5.%Column4%の部分が実際にはAdapterからのデータの'time=1ms'に置換されている
+
+
+・-trigger及び、-queryを複数個指定可能とした。
+  指定方法は複数個-triggerや-queryを指定するのみ。
+  先頭から-tirggerから実行され、指定した全ての条件をクリア後、-queryが同じように
+  先頭から実行される。
+
+・-easyqueyを追加
+  SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。
+  現在利用可能な関数とその機能は以下
+  [関数一覧]");
+  'avg_over':特定のカラムの平均が指定値以上か調べる(対象Table名, 対象Column名, 条件指定の値)
+  'avg_below':特定のカラムの平均が指定値以下か調べる(対象Table名, 対象Column名, 条件指定の値)
+  'over_value':特定のカラムの最大値が指定値以上か調べる(対象Table名, 対象Column名, 条件指定の値)
+  'below_value':特定のカラムの最小値が指定値以下か調べる(対象Table名, 対象Column名, 条件指定の値)
+  'avg_more_over':特定のカラムの平均の指定倍以上の値が存在するか調べる(対象Table名, 対象Column名, 条件指定の値)
+  [指定例]");
+   -easyquery avg_over(pipe, column4, 3)
+   ※内部で実際に実行されているSQLは-debug onで確認可能
+
 
 サーバモードを追加
 ・従来のコマンドラインモードではなく完全なサーバモード
