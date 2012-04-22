@@ -1,0 +1,2 @@
+#!/bin/sh
+ping -t 192.168.1.1 | grep --line-buffered ttl | java -jar setsuna.jar -trigger "column4 > 1" -trigger "column5 like 51" -query "select * from pipe where column5 like '%51%'"  -query "select * from pipe where column3 like '%32%'" -debug on
