@@ -541,7 +541,9 @@ public class SetsunaMain {
             if(SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE != null || SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION  != null || SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION  != null) {
                 if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE != null) {
                     causeContainer = new CauseContainer();
-                    causeContainer.add2BuildCause(SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE);
+                    for (int idx = 0; idx < SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE.length; idx++) {
+                        causeContainer.add2BuildCause(SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE[idx]);
+                    }
                 }
 
                 if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION == null && SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION != null) {
@@ -549,8 +551,14 @@ public class SetsunaMain {
                 }
 
                 if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION != null) {
-                    String esayQuerySQL = ConditionContainer.parseEsayQuery(SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION);
-                    conditionContainer = new ConditionContainer(esayQuerySQL);
+
+                    String[] easyQueryList = new String[SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION.length];
+                    for (int idx = 0; idx < SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION.length; idx++) {
+                        String esayQuerySQL = ConditionContainer.parseEsayQuery(SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION[idx]);
+                        easyQueryList[idx] = esayQuerySQL;
+
+                    }
+                    conditionContainer = new ConditionContainer(easyQueryList);
                 }
             }
 

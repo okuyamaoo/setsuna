@@ -82,6 +82,8 @@ public class ConditionContainer {
 
 
             for (int idx = 0; idx < this.preparedStatementList.length; idx++) {
+                if (!ret) break; // 既にマッチしていない
+
                 ResultSet resultSet = null;
                 PreparedStatement pst = null;
                 // SQLにAdapterデータ埋め込みの場合はここでクエリ作成

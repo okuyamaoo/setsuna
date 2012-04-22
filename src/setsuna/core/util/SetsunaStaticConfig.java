@@ -38,11 +38,11 @@ public class SetsunaStaticConfig {
 
     public volatile static String DEFAULT_PIPEINPUT_QUERY_TARGET = null; // デフォルトのスタンドアローンモードでどのデータをチェックするかの名前(標準入力を対象とする場合は省略)
 
-    public volatile static String DEFAULT_PIPEINPUT_QUERY_CAUSE = null;
+    public volatile static String[] DEFAULT_PIPEINPUT_QUERY_CAUSE = null;
 
-    public volatile static String DEFAULT_PIPEINPUT_QUERY_CONDITION = null;
+    public volatile static String[] DEFAULT_PIPEINPUT_QUERY_CONDITION = null;
 
-    public volatile static String DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION = null;
+    public volatile static String[] DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION = null;
 
     public volatile static String DEFAULT_PIPEINPUT_DEFAULT_EXECUTION_EVENT = "setsuna.core.event.DefaultScriptExecutionEventScript";
 
@@ -199,8 +199,20 @@ public class SetsunaStaticConfig {
             if (startArgument[i].trim().equals("-trigger")) {
                 if (startArgument.length > (i+1)) {
                     if (startArgument[i+1] != null) {
+                        if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE == null) {
 
-                        SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE = startArgument[i+1];
+                            String[] causeList = new String[1];
+                            causeList[0] = startArgument[i+1];
+                            SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE = causeList;
+                        } else {
+
+                            String[] causeList = new String[SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE.length + 1];
+                            for (int causeIdx = 0; causeIdx < SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE.length; causeIdx++) {
+                                causeList[causeIdx] = SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE[causeIdx];
+                            }
+                            causeList[SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE.length] = startArgument[i+1];
+                            SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CAUSE = causeList;
+                        }
                     }
                 }
             }
@@ -210,7 +222,20 @@ public class SetsunaStaticConfig {
                 if (startArgument.length > (i+1)) {
                     if (startArgument[i+1] != null) {
 
-                        SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION = startArgument[i+1];
+                        if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION == null) {
+
+                            String[] conditionList = new String[1];
+                            conditionList[0] = startArgument[i+1];
+                            SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION = conditionList;
+                        } else {
+
+                            String[] conditionList = new String[SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION.length + 1];
+                            for (int conditionIdx = 0; conditionIdx < SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION.length; conditionIdx++) {
+                                conditionList[conditionIdx] = SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION[conditionIdx];
+                            }
+                            conditionList[SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION.length] = startArgument[i+1];
+                            SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_CONDITION = conditionList;
+                        }
                     }
                 }
             }
@@ -220,7 +245,20 @@ public class SetsunaStaticConfig {
                 if (startArgument.length > (i+1)) {
                     if (startArgument[i+1] != null) {
 
-                        SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION = startArgument[i+1];
+                        if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION == null) {
+
+                            String[] conditionList = new String[1];
+                            conditionList[0] = startArgument[i+1];
+                            SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION = conditionList;
+                        } else {
+
+                            String[] conditionList = new String[SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION.length + 1];
+                            for (int conditionIdx = 0; conditionIdx < SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION.length; conditionIdx++) {
+                                conditionList[conditionIdx] = SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION[conditionIdx];
+                            }
+                            conditionList[SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION.length] = startArgument[i+1];
+                            SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION = conditionList;
+                        }
                     }
                 }
             }

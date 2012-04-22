@@ -57,10 +57,10 @@ public class DefaultEasyServerAdapter extends AbstractDefaultAdapter implements 
     }
 
 
-
     /**
      * MessagePack-RPCによって呼ばれるRPC用メソッド.<br>
      * 内部ではQueueにデータをいれているだけ<br>
+     * 本メソッドは戻り値にデータの投入の成否を返す.<br>
      *
      * @param data クライアントから渡されたデータ配列(カラム数分の想定。違っている場合は-9を返す)
      * @return int 正常終了 0, カラム定義と合わない -9, 内部エラー -1
@@ -87,6 +87,7 @@ public class DefaultEasyServerAdapter extends AbstractDefaultAdapter implements 
         }
         return 0;
     }
+
 
     // カラム定義を作る
     private void makeColumn(String[] data) {
