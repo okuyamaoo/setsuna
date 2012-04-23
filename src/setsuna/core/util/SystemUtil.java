@@ -10,12 +10,15 @@ import java.util.*;
  */
 public class SystemUtil {
 
+
+    // TODO:ここでOutput実装をするとAdapterのデータを出力可能
     public static void outputAdapterData(String adapterData) {
-        System.out.println(adapterData);
+        //System.out.println(adapterData);
     }
 
+    // TODO:ここでOutput実装をするとAdapterのデータを出力可能
     public static void outputAdapterData(String[] adapterData) {
-        System.out.println(adapterData);
+        //System.out.println(adapterData);
     }
 
     public static void debug(Object obj) {

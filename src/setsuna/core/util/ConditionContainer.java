@@ -156,12 +156,17 @@ public class ConditionContainer {
 
     /**
      * 簡易型クエリーのパーサー.<br>
+     * 引数の各こうもくは全てコーテーション及び、ダブルコーテーションなしの値を指定
      * "avg_over":特定のカラムの平均が指定値以上か調べる(table, column, overvalue)
      * "avg_below":特定のカラムの平均が指定値以下か調べる(table, column, belowvalue)
      * "over_value":特定のカラムの最大値が指定値以上か調べる(table, column, overvalue)
      * "below_value":特定のカラムの最小値が指定値以下か調べる(table, column, belowvalue)
      * "avg_more_over":特定のカラムの平均の指定倍以上の値が存在するか調べる(table, column, multiple_number)
-     *
+     * "last_time_avg_more_over":特定のテーブルの特定のカラムの直近特定秒以内のデータの平均値を特定倍以上超えるデータがあるか調べる(table, column, lasttime, multiple_number)
+     * "count_last_time_avg_more_over":上記が特定件数以上ある(table, column, lasttime, multiple_number, count)
+     * "time_range_in_avg_over":直近の指定値秒間の特定カラムの平均値が指定値以上である(table, column, rangetime, overvalue)
+     * "time_range_in_avg_below":直近の指定値秒間の特定カラムの平均値が指定値以下である(table, column, rangetime, belowvalue)
+     * "time_range_in_value_multi_exist":あるテーブルのあるカラムの値が同じ値が直近からの指定秒間以内に指定値回登場する(table, column, rangetime, over_value)
      *
      */
     public static String parseEsayQuery(String queryString) throws Exception {
@@ -197,11 +202,36 @@ public class ConditionContainer {
             } else if (convertTargetStr.indexOf("avg_more_over(") == 0) {
 
                 // table, column, multiple_number
-                sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
-                sql = "select * from (" + params[0]+ ") where params[1] >  " + "select (avg(to_number(" +  params[1] + ")) * " + params[2] + ") as val from " + params[0];
+                sql = "select * from (" + params[0]+ ") where to_number(" + params[1] + ") >= " + "(select (avg(to_number(" +  params[1] + ")) * " + params[2] + ") as val from " + params[0] + ")";
+            } else if (convertTargetStr.indexOf("last_time_avg_more_over(") == 0) {
+
+                // table, column, lasttime, multiple_number
+                sql = "select " + params[1] + " from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
+                sql = "select * from (" + sql+ ") where to_number(" + params[1] + ") >= " + "(select (avg(to_number(" +  params[1] + ")) * " + params[3] + ") as val from " + params[0] + " where where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp))";
+            } else if (convertTargetStr.indexOf("count_last_time_avg_more_over(") == 0) {
+
+                // table, column, lasttime, multiple_number, count
+                sql = "select " + params[1] + " from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
+                sql = "select count(" + params[1] + ") as cnt from (" + sql+ ") where to_number(" +  params[1] + ") >  " + "(select (avg(to_number(" +  params[1] + ")) * " + params[3] + ") as val from " + params[0] + " where where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp))";
+                sql = "select * from (" + sql + ") where cnt >= " + params[4];
+            } else if (convertTargetStr.indexOf("time_range_in_avg_over(") == 0) {
+
+                // table, column, rangetime, overvalue
+                sql = "select " + params[1] + " from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
+                sql = "select * from (" + sql+ ") where to_number(" + params[1] + ") >= " +  params[3];
+            } else if (convertTargetStr.indexOf("time_range_in_avg_below(") == 0) {
+
+                // table, column, rangetime, belowvalue
+                sql = "select " + params[1] + " from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
+                sql = "select * from (" + sql+ ") where to_number(" + params[1] + ") <= " +  params[3];
+            } else if (convertTargetStr.indexOf("time_range_in_value_multi_exist") == 0) {
+
+                // table, column, rangetime, multiple_number
+                sql = "select " + params[1] + " as val, count(" + params[1] + ") as cnt from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp) group by " + params[1];
+                sql = "select * from (" + sql+ ") where cnt >= " +  params[3];
             } else {
                 // Unknown pattern
-                throw new Exception("Unknown -esayquery pattern");                
+                throw new Exception("Unknown -esayquery pattern");
             }
         } catch (Exception e) {
             throw e;

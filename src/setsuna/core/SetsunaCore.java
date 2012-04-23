@@ -76,7 +76,7 @@ public class SetsunaCore {
 
                     if(!StreamDbUtil.dropTable(adapter.getName())) throw new SetsunaException("Failed in a change of Adapter 1.");
 
-                    if (!StreamDbUtil.createTable(adapter.getName(), adapter.getDataColumnNames())) throw new SetsunaException("Failed in a change of Adapter 2.");
+                    if (!StreamDbUtil.createTable(adapter.getName(), adapter.getDataColumnNames(), true)) throw new SetsunaException("Failed in a change of Adapter 2.");
                     setsunaCoreAdapterEngine = new SetsunaCoreAdapterEngine(adapter);
                     setsunaCoreAdapterEngine.setEngineName(engineName);
                     setsunaCoreAdapterEngine.start();
@@ -89,7 +89,7 @@ public class SetsunaCore {
                 }
             } else {
 
-                if (!StreamDbUtil.createTable(adapter.getName(), adapter.getDataColumnNames())) throw new SetsunaException("Failed in a change of Adapter 3.");
+                if (!StreamDbUtil.createTable(adapter.getName(), adapter.getDataColumnNames(), false)) throw new SetsunaException("Failed in a change of Adapter 3.");
 
                 setsunaCoreAdapterEngine = new SetsunaCoreAdapterEngine(adapter);
                 setsunaCoreAdapterEngine.setEngineName(engineName);
