@@ -1,6 +1,7 @@
 package setsuna.core;
 
 import java.io.*;
+import java.util.*;
 import java.net.*;
 
 import setsuna.core.util.*;
@@ -566,13 +567,20 @@ public class SetsunaMain {
 
                 if (SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION != null) {
 
-                    String[] easyQueryList = new String[SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION.length];
+                    List easyQueryList = new ArrayList();
                     for (int idx = 0; idx < SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION.length; idx++) {
-                        String esayQuerySQL = ConditionContainer.parseEsayQuery(SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION[idx]);
-                        easyQueryList[idx] = esayQuerySQL;
+                        String[] esayQuerySQL = ConditionContainer.parseEsayQuery(SetsunaStaticConfig.DEFAULT_PIPEINPUT_EASY_QUERY_CONDITION[idx]);
 
+                        for (int multiEasyIdx = 0; multiEasyIdx < esayQuerySQL.length; multiEasyIdx++) {
+                            easyQueryList.add(esayQuerySQL[multiEasyIdx]);
+                        }
                     }
-                    conditionContainer = new ConditionContainer(easyQueryList);
+
+                    String[] multiEasyQuery = new String[easyQueryList.size()];
+                    for (int idx = 0; idx < easyQueryList.size(); idx++) {
+                        multiEasyQuery[idx] = (String)easyQueryList.get(idx);
+                    }
+                    conditionContainer = new ConditionContainer(multiEasyQuery);
                 }
             }
 
