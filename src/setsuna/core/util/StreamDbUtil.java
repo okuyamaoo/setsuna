@@ -27,6 +27,8 @@ public class StreamDbUtil {
     private static String createToCharAlias = "";
     private static String dropToCharAlias = "DROP ALIAS TO_CHAR";
 
+    private static String checkTableExistQuery = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?";
+
 
     static {
 
@@ -95,7 +97,7 @@ public class StreamDbUtil {
     }
 
 
-    public static boolean createTable(String tableName, String[] columnList) throws Exception {
+    public static boolean createTable(String tableName, String[] columnList, boolean reCreate) throws Exception {
         Connection conn = null;
         try {
 
@@ -120,48 +122,65 @@ public class StreamDbUtil {
 
             // テーブル再作成時は自動的に削除される
             try {
-                dropTable(tableName);
+                if (reCreate == true)  dropTable(tableName); //再作成指定がtrueの場合は必ずDropする
             } catch (Exception ee) {}
 
-            // テーブル新規作成
-            int ret = preparedStatement.executeUpdate();
+            boolean createQueryExecute = true;
 
-            if (ret == 0) {
-                conn.commit();
-                preparedStatement.close();
-                // 暗黙の登録時間に対するIndex作成
-                preparedStatement = conn.prepareStatement(indexCreateTpl[0] + 
-                                                         tableName + "_C_TIME" + 
-                                                         indexCreateTpl[2] + 
-                                                         tableName + 
-                                                         indexCreateTpl[4] + 
-                                                         "C_TIME" + 
-                                                         indexCreateTpl[6]);
-                preparedStatement.executeUpdate();
-                preparedStatement.close();
+            // 再作成指定がfalseの場合は、ここでテーブル存在確認
+            if (reCreate == false) {
 
+                PreparedStatement checkPreparedStatement = conn.prepareStatement(checkTableExistQuery);
+                checkPreparedStatement.setString(1, tableName);
+                ResultSet existCheckRet = checkPreparedStatement.executeQuery();
+                if (existCheckRet.next()) {
+                    int cnt = existCheckRet.getInt(1);
+                    if (cnt > 0) createQueryExecute = false;
+                }
+                existCheckRet.close();
+                checkPreparedStatement.close();
+            }
 
-                // その他カラムに対するIndex作成
-                for (int idx = 0; idx < columnList.length; idx++) {
+            if (createQueryExecute) {
+                // テーブル新規作成
+                int ret = preparedStatement.executeUpdate();
 
+                if (ret == 0) {
+                    conn.commit();
+                    preparedStatement.close();
+                    // 暗黙の登録時間に対するIndex作成
                     preparedStatement = conn.prepareStatement(indexCreateTpl[0] + 
-                                                             tableName +  "_" + columnList[idx] + 
+                                                             tableName + "_C_TIME" + 
                                                              indexCreateTpl[2] + 
                                                              tableName + 
                                                              indexCreateTpl[4] + 
-                                                             columnList[idx] + 
+                                                             "C_TIME" + 
                                                              indexCreateTpl[6]);
                     preparedStatement.executeUpdate();
                     preparedStatement.close();
-                }
 
-                conn.commit();
-            } else {
-                conn.rollback();
-                preparedStatement.close();
-                return false;
+
+                    // その他カラムに対するIndex作成
+                    for (int idx = 0; idx < columnList.length; idx++) {
+
+                        preparedStatement = conn.prepareStatement(indexCreateTpl[0] + 
+                                                                 tableName +  "_" + columnList[idx] + 
+                                                                 indexCreateTpl[2] + 
+                                                                 tableName + 
+                                                                 indexCreateTpl[4] + 
+                                                                 columnList[idx] + 
+                                                                 indexCreateTpl[6]);
+                        preparedStatement.executeUpdate();
+                        preparedStatement.close();
+                    }
+
+                    conn.commit();
+                } else {
+                    conn.rollback();
+                    preparedStatement.close();
+                    return false;
+                }
             }
-        
         } catch(Exception e) {
             if (conn != null) conn.rollback();
             throw e;

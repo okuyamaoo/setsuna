@@ -58,13 +58,30 @@ public class SetsunaCoreAdapterEngine extends AbstractCoreEngine {
         try {
             conn = StreamDatabaseConnectManager.getConnection(true);
         
+            long readCount = 0L;
+            boolean skipMode = false;
+            if (SetsunaStaticConfig.DATA_INPUT_OFFSET > 0) skipMode = true;
 
             while (true) {
 
                 Map readData = userAdapter.read();
+
                 if (readData == null) break;
+
+                // Skip設定
+                if (skipMode == true) {
+                    readCount++;
+                    if (readCount < SetsunaStaticConfig.DATA_INPUT_OFFSET) {
+                        continue;
+                    } else {
+                        skipMode = false;
+                    }
+                }
+
+                // データの項目とカラム定義の整合性チェック
                 if (!this.checkDataColumn(readData, this.userAdapter.getDataColumnNames())) {
-                    throw new SetsunaException("The read data differs from definition information. Adapter name is " + userAdapter.getName());
+                    if (!SetsunaStaticConfig.ERROR_DATA_SKIP)
+                        throw new SetsunaException("The read data differs from definition information. Adapter name is " + userAdapter.getName());
                 } else {
 
                     AdapterJoinQueueMapper.mappingAdapterData(userAdapter.getName(), readData);

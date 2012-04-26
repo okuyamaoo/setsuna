@@ -2,6 +2,7 @@ package setsuna.core.event;
 
 import java.util.*;
 
+import setsuna.core.util.*;
 
 /**
  * 渡された値を標準出力に出力するechoイベント用スクリプトクラス.<br>
@@ -39,7 +40,7 @@ public class EchoScript implements IScript {
             }
             argStr.append("}");
 
-            System.out.println(argStr.toString());
+            SystemUtil.printout(argStr.toString());
         } catch (Exception e) {
             throw e;
         }

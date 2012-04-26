@@ -18,7 +18,7 @@ import setsuna.core.util.*;
  *
  * @author T.Okuyama
  */
-public class DefaultEasyServerAdapter implements IAdapter  {
+public class DefaultEasyServerAdapter extends AbstractDefaultAdapter implements IAdapter  {
 
     private String[] columnList = null;
     private long arrivalTime = 0L;
@@ -57,10 +57,10 @@ public class DefaultEasyServerAdapter implements IAdapter  {
     }
 
 
-
     /**
      * MessagePack-RPCによって呼ばれるRPC用メソッド.<br>
      * 内部ではQueueにデータをいれているだけ<br>
+     * 本メソッドは戻り値にデータの投入の成否を返す.<br>
      *
      * @param data クライアントから渡されたデータ配列(カラム数分の想定。違っている場合は-9を返す)
      * @return int 正常終了 0, カラム定義と合わない -9, 内部エラー -1
@@ -87,6 +87,7 @@ public class DefaultEasyServerAdapter implements IAdapter  {
         }
         return 0;
     }
+
 
     // カラム定義を作る
     private void makeColumn(String[] data) {
@@ -138,10 +139,18 @@ public class DefaultEasyServerAdapter implements IAdapter  {
             retMap = new LinkedHashMap();
             String[] data = (String[])this.nextDataQueue.take();
 
+            StringBuilder debugData = new StringBuilder();
+            String sep ="";
             for (int idx = 0; idx < columnList.length; idx++) {
+                debugData.append(sep);
+                debugData.append("[" + idx + "]=\"" + data[idx] + "\"");
+                sep = ",";
                 retMap.put(this.columnList[idx], data[idx]);
             }
-            
+            super.debug("Server Input=[" + debugData + "]");
+            // -output指定
+            super.outputAdapterData(data);
+
         } catch (Exception e) {
             //System.err.println("readLine=" + readLine);
             //throw new SetsunaException("Adapter read string =[" + readLine + "]", e);

@@ -12,7 +12,7 @@ import setsuna.core.util.*;
  *
  * @author T.Okuyama
  */
-public class DefaultPipeInputAdapter implements IAdapter {
+public class DefaultPipeInputAdapter extends AbstractDefaultAdapter implements IAdapter {
 
     private InputStream is = null;
     private String[] columnList = null;
@@ -129,10 +129,16 @@ public class DefaultPipeInputAdapter implements IAdapter {
             if (this.testReadLine != null) {
                 retMap = new LinkedHashMap();
 
+                // デバッグ
+                super.debug("Pipe Input=[" + this.testReadLine + "]");
+                // -output指定
+                super.outputAdapterData(this.testReadLine);
+
                 String[] splitData = this.testReadLine.split(sep);
                 for (int idx = 0; idx < columnList.length; idx++) {
                     retMap.put(this.columnList[idx], splitData[idx]);
                 }
+
                 this.testReadLine = null;
             } else {
 
@@ -159,6 +165,10 @@ public class DefaultPipeInputAdapter implements IAdapter {
                     readLine = this.in.readLine();
                 }
 
+                // デバッグ
+                super.debug("Pipe Input=[" + readLine + "]");
+                // -output指定
+                super.outputAdapterData(readLine);
 
                 // セパレート文字列の連続つぶす場合の処理
                 while (true) {
