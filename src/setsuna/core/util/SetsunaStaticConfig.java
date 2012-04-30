@@ -60,10 +60,16 @@ public class SetsunaStaticConfig {
     public volatile static String STANDALONE_ADAPTER_CLASS_NAME = null; // スタンドアローンモードで利用するAdapterのクラス名
 
     public volatile static String DEFAULT_EASY_SERVER_TABLE_NAME = "SERVER";
-
     public volatile static boolean DEFAULT_EASY_SERVER_MODE = false;
     public volatile static String DEFAULT_EASY_SERVER_BIND_ADDRESS = null;
     public volatile static int DEFAULT_EASY_SERVER_BIND_PORT = 10028;
+
+    public volatile static String DEFAULT_HTTP_SERVER_TABLE_NAME = "HTTP";
+    public volatile static boolean DEFAULT_HTTP_SERVER_MODE = false;
+    public volatile static String DEFAULT_HTTP_SERVER_BIND_ADDRESS = null;
+    public volatile static int DEFAULT_HTTP_SERVER_BIND_PORT = 8080;
+    public volatile static String DEFAULT_HTTP_SERVER_CONTEXT = null;
+
 
     public volatile static String DEFAULT_SETSUNA_ERROR_LOG = null;
 
@@ -290,6 +296,7 @@ public class SetsunaStaticConfig {
 
                         SetsunaStaticConfig.DEFAULT_PIPEINPUT_TABLE_NAME = startArgument[i+1].trim();
                         SetsunaStaticConfig.DEFAULT_EASY_SERVER_TABLE_NAME = startArgument[i+1].trim();
+                        SetsunaStaticConfig.DEFAULT_HTTP_SERVER_TABLE_NAME = startArgument[i+1].trim();
                     }
                 }
             }
@@ -357,6 +364,44 @@ public class SetsunaStaticConfig {
                     }
                 }
             }
+
+            if (startArgument[i].trim().equals("-httpserver")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+                        if (startArgument[i+1].trim().toUpperCase().equals("TRUE")) 
+                            SetsunaStaticConfig.DEFAULT_HTTP_SERVER_MODE = true;
+                    }
+                }
+            }
+
+            if (startArgument[i].trim().equals("-httpbindaddr")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+
+                        SetsunaStaticConfig.DEFAULT_HTTP_SERVER_BIND_ADDRESS = startArgument[i+1].trim();
+                    }
+                }
+            }
+
+
+            if (startArgument[i].trim().equals("-httpbindport")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+
+                        SetsunaStaticConfig.DEFAULT_HTTP_SERVER_BIND_PORT = Integer.parseInt(startArgument[i+1].trim());
+                    }
+                }
+            }
+
+            if (startArgument[i].trim().equals("-httpcontext")) {
+                if (startArgument.length > (i+1)) {
+                    if (startArgument[i+1] != null) {
+
+                        SetsunaStaticConfig.DEFAULT_HTTP_SERVER_CONTEXT = startArgument[i+1].trim().toLowerCase();
+                    }
+                }
+            }
+
 
             if (startArgument[i].trim().equals("-errorlog")) {
                 if (startArgument.length > (i+1)) {

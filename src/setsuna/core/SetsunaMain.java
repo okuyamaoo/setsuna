@@ -197,6 +197,7 @@ public class SetsunaMain {
                     System.out.println(" -server:サーバモードの起動指定");
                     System.out.println("         サーバモードで起動した場合、MessagePack-RPCで作られたサーバでデータの投入を待ち受ける");
                     System.out.println("         MessagePack-RPCで作成されたクライアントでデータを投入することが出来る");
+                    System.out.println("         本モードで起動した場合に-query等で利用するテーブル名は-streamを指定しない場合、'server'というテーブル名になる");
                     System.out.println("         サーバ側で定義されているRPCメソッド定義は以下");
                     System.out.println("         [メソッド定義]");
                     System.out.println("          int next ( String[] sendData )");
@@ -221,6 +222,56 @@ public class SetsunaMain {
                     System.out.println("           ※省略した場合は10028番で起動する");
                     System.out.println("           [指定例]");
                     System.out.println("            -bindport 10222");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpserver:HTTPサーバモードの起動指定");
+                    System.out.println("             HTTPサーバで起動した場合はデフォルト8080番ポートでHTTPプロトコルでAdapter入力を待ち受ける");
+                    System.out.println("             待ち受けるコンテキストは指定なくルート直下全てが対象となる。つまり「http://setsunaexample.org/」のように指定することになる");
+                    System.out.println("             待ち受けるコンテキストを指定したい場合は-httpcontextオプションを利用する");
+                    System.out.println("             HTTP通信で1リクエスト1データとして入力が可能");
+                    System.out.println("             ・入力のHTTPパラメータのフォーマットはKey=Valueとする。このKeyの部分がSetsunaの内部DBのカラム名となり、");
+                    System.out.println("               Valueの部分はデータとなる。-columnを指定している場合は、指定した名前でHTTPパラメータ内を探索するため、");
+                    System.out.println("               指定したKeyが無ければパラメータが作れずエラーとなる。");
+                    System.out.println("               Getでのリクエストを例にすると以下は4つのカラムデータを投入している");
+                    System.out.println("               http://setsunaexample.org/?column1=XXX1&column2=20120501120000&column3=testdata1&column4=exampledata1");
+                    System.out.println("             入力後、返却される値はHTTPステータスコードだけとなり、bodyの返却はない");
+                    System.out.println("             ・HTTPステータスコードの対応は以下となる");
+                    System.out.println("               200 : 入力成功");
+                    System.out.println("               400 : 入力データが最初にSetsunaに投入された場合と入力パラメータ数が異なる。正しいからメータ数にすれば復旧可能");
+                    System.out.println("               500 : Setsuna側でなんだかのサーバエラーが発生している。クライアントによる復旧不可");
+                    System.out.println("             -serverと同時に指定すると-serverで起動するMessagePack-RPCでのサーバが優先されこちらは起動しない");
+                    System.out.println("             本モードで起動した場合に-query等で利用するテーブル名は-streamを指定しない場合、'server'というテーブル名になる");
+                    System.out.println("             **省略可能**");
+                    System.out.println("             ※省略した場合はパイプ入力となる");
+                    System.out.println("             [指定例]");
+                    System.out.println("               -httpserver true");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpbindaddr:HTTPサーバモードの起動時のサーバがバインドするアドレス");
+                    System.out.println("               HTTPサーバモードで起動した場合のみ有効");
+                    System.out.println("               **省略可能**");
+                    System.out.println("               ※省略した場合は0.0.0.0にバインドされる");
+                    System.out.println("               [指定例]");
+                    System.out.println("                -httpbindaddr 192.168.1.1");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpbindport:HTTPサーバモードの起動時のサーバが待ち受けるポート番号");
+                    System.out.println("               RHEL系のOSの場合、root権限意外では80番を指定することは出来ない場合があるため注意が必要である");
+                    System.out.println("               HTTPサーバモードで起動した場合のみ有効");
+                    System.out.println("               **省略可能**");
+                    System.out.println("               ※省略した場合は8080番で起動する");
+                    System.out.println("               [指定例]");
+                    System.out.println("               -httpbindport 9090");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpcontext:HTTPサーバモードの起動時のコンテキストを限定したい場合に利用する");
+                    System.out.println("              HTTPサーバモードで起動した場合のみ有効");
+                    System.out.println("              **省略可能**");
+                    System.out.println("              ※省略した場合は全てのコンテキストが1入力になる");
+                    System.out.println("              [指定例]");
+                    System.out.println("              -httpcontext setsuna");
+                    System.out.println("               上記の場合の入力URLは以下となる");
+                    System.out.println("               http://setsunaexample.org/setsuna");
                     System.out.println("  ");
                     System.out.println("  ");
                     System.out.println("  ");
@@ -480,10 +531,14 @@ public class SetsunaMain {
 
             // それぞの要素を呼び出し
             AbstractCoreEngine coreAdapterEngine = null;
-            if (!SetsunaStaticConfig.DEFAULT_EASY_SERVER_MODE) {
-                coreAdapterEngine = this.startPipeAdapter();
-            } else {
+            if (SetsunaStaticConfig.DEFAULT_EASY_SERVER_MODE) {
+            
                 coreAdapterEngine = this.startEasyServerAdapter();
+            } else if (SetsunaStaticConfig.DEFAULT_HTTP_SERVER_MODE) {
+            
+                coreAdapterEngine = this.startHttpServerAdapter();
+            } else {
+                coreAdapterEngine = this.startPipeAdapter();
             }
             AbstractCoreEngine coreQueryEngine = this.startQuery();
             AbstractCoreEngine coreUserEventEngine = this.startUserEvent();
@@ -525,7 +580,7 @@ public class SetsunaMain {
 
 
     private AbstractCoreEngine startEasyServerAdapter() throws Exception {
-        // Setsunaに対するAdapterを開始
+        // Setsunaに対するMsgPack-RPC-Adapterを開始
         AbstractCoreEngine coreAdapterEngine = null;
         IAdapter easyServerAdapter = null;
 
@@ -539,6 +594,27 @@ public class SetsunaMain {
             SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGET = SetsunaStaticConfig.DEFAULT_EASY_SERVER_TABLE_NAME;
             // 標準のパイプラインアダプターを利用する
             coreAdapterEngine = setsunaCore.executeAdapterEngine(easyServerAdapter);
+        } catch (Exception e) {
+            throw e;
+        }
+        return coreAdapterEngine;
+    }
+
+    private AbstractCoreEngine startHttpServerAdapter() throws Exception {
+        // Setsunaに対するHTTP-Adapterを開始
+        AbstractCoreEngine coreAdapterEngine = null;
+        IAdapter httpServerAdapter = null;
+
+        try {
+            // Server型の入力を監視する
+            httpServerAdapter = new DefaultHttpServerAdapter(SetsunaStaticConfig.DEFAULT_HTTP_SERVER_BIND_ADDRESS,
+                                                             SetsunaStaticConfig.DEFAULT_HTTP_SERVER_BIND_PORT,
+                                                             SetsunaStaticConfig.DEFAULT_PIPEINPUT_COLUMN_LIST,
+                                                             SetsunaStaticConfig.DEFAULT_PIPEINPUT_DATA_ARRIVAL_TIME,
+                                                             SetsunaStaticConfig.DEFAULT_HTTP_SERVER_CONTEXT);
+            // 監視するAdapter名を代入(ここでは標準の設定を利用する)
+            SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGET = SetsunaStaticConfig.DEFAULT_HTTP_SERVER_TABLE_NAME;
+            coreAdapterEngine = setsunaCore.executeAdapterEngine(httpServerAdapter);
         } catch (Exception e) {
             throw e;
         }
@@ -584,7 +660,7 @@ public class SetsunaMain {
                 }
             }
 
-            // クエリーを実行
+            // クエリーを実行(ここで指定したSetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGETがQueryがQueueからデータを取得するさいに利用される
             coreQueryEngine = setsunaCore.executeQueryEngine("PipedQuery", SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGET, causeContainer, conditionContainer);
 
         } catch (Exception e) {
