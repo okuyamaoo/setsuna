@@ -17,6 +17,7 @@ public class EchoScript implements IScript {
 
     public void execute(Map data) throws Exception {
         try {
+
             StringBuilder argStr = new StringBuilder(100);
             argStr.append("{");
             String sep = "";

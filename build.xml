@@ -7,6 +7,7 @@
 	<property name="version"		value="0.0.2" />
 	<property name="lib.dir"	    value="lib"/>
 	<property name="msgpack.lib.dir" value="lib/msgpack"/>
+	<property name="jetty.lib.dir" value="lib/jetty"/>
 	<property name="makejar.dir"	value="makejar"/>
 	<property name="main.class"	value="setsuna.core.SetsunaMain"/>
 
@@ -24,6 +25,11 @@
 		<pathelement path = "${msgpack.lib.dir}/netty-3.2.7.Final.jar"/>
 		<pathelement path = "${msgpack.lib.dir}/slf4j-api-1.6.1.jar"/>
 		<pathelement path = "${msgpack.lib.dir}/slf4j-log4j12-1.6.1.jar"/>
+		<pathelement path = "${jetty.lib.dir}/jetty-server-7.6.3.v20120416.jar"/>
+		<pathelement path = "${jetty.lib.dir}/jetty-servlet-7.6.3.v20120416.jar"/>
+		<pathelement path = "${jetty.lib.dir}/jetty-util-7.6.3.v20120416.jar"/>
+		<pathelement path = "${jetty.lib.dir}/jetty-http-7.6.3.v20120416.jar"/>
+		<pathelement path = "${jetty.lib.dir}/servlet-api-2.5.jar"/>
 	</path>
 
 

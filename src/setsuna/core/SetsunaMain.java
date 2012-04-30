@@ -197,6 +197,7 @@ public class SetsunaMain {
                     System.out.println(" -server:サーバモードの起動指定");
                     System.out.println("         サーバモードで起動した場合、MessagePack-RPCで作られたサーバでデータの投入を待ち受ける");
                     System.out.println("         MessagePack-RPCで作成されたクライアントでデータを投入することが出来る");
+                    System.out.println("         本モードで起動した場合に-query等で利用するテーブル名は-streamを指定しない場合、'server'というテーブル名になる");
                     System.out.println("         サーバ側で定義されているRPCメソッド定義は以下");
                     System.out.println("         [メソッド定義]");
                     System.out.println("          int next ( String[] sendData )");
@@ -221,6 +222,56 @@ public class SetsunaMain {
                     System.out.println("           ※省略した場合は10028番で起動する");
                     System.out.println("           [指定例]");
                     System.out.println("            -bindport 10222");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpserver:HTTPサーバモードの起動指定");
+                    System.out.println("             HTTPサーバで起動した場合はデフォルト8080番ポートでHTTPプロトコルでAdapter入力を待ち受ける");
+                    System.out.println("             待ち受けるコンテキストは指定なくルート直下全てが対象となる。つまり「http://setsunaexample.org/」のように指定することになる");
+                    System.out.println("             待ち受けるコンテキストを指定したい場合は-httpcontextオプションを利用する");
+                    System.out.println("             HTTP通信で1リクエスト1データとして入力が可能");
+                    System.out.println("             ・入力のHTTPパラメータのフォーマットはKey=Valueとする。このKeyの部分がSetsunaの内部DBのカラム名となり、");
+                    System.out.println("               Valueの部分はデータとなる。-columnを指定している場合は、指定した名前でHTTPパラメータ内を探索するため、");
+                    System.out.println("               指定したKeyが無ければパラメータが作れずエラーとなる。");
+                    System.out.println("               Getでのリクエストを例にすると以下は4つのカラムデータを投入している");
+                    System.out.println("               http://setsunaexample.org/?column1=XXX1&column2=20120501120000&column3=testdata1&column4=exampledata1");
+                    System.out.println("             入力後、返却される値はHTTPステータスコードだけとなり、bodyの返却はない");
+                    System.out.println("             ・HTTPステータスコードの対応は以下となる");
+                    System.out.println("               200 : 入力成功");
+                    System.out.println("               400 : 入力データが最初にSetsunaに投入された場合と入力パラメータ数が異なる。正しいからメータ数にすれば復旧可能");
+                    System.out.println("               500 : Setsuna側でなんだかのサーバエラーが発生している。クライアントによる復旧不可");
+                    System.out.println("             -serverと同時に指定すると-serverで起動するMessagePack-RPCでのサーバが優先されこちらは起動しない");
+                    System.out.println("             本モードで起動した場合に-query等で利用するテーブル名は-streamを指定しない場合、'server'というテーブル名になる");
+                    System.out.println("             **省略可能**");
+                    System.out.println("             ※省略した場合はパイプ入力となる");
+                    System.out.println("             [指定例]");
+                    System.out.println("               -httpserver true");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpbindaddr:HTTPサーバモードの起動時のサーバがバインドするアドレス");
+                    System.out.println("               HTTPサーバモードで起動した場合のみ有効");
+                    System.out.println("               **省略可能**");
+                    System.out.println("               ※省略した場合は0.0.0.0にバインドされる");
+                    System.out.println("               [指定例]");
+                    System.out.println("                -httpbindaddr 192.168.1.1");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpbindport:HTTPサーバモードの起動時のサーバが待ち受けるポート番号");
+                    System.out.println("               RHEL系のOSの場合、root権限意外では80番を指定することは出来ない場合があるため注意が必要である");
+                    System.out.println("               HTTPサーバモードで起動した場合のみ有効");
+                    System.out.println("               **省略可能**");
+                    System.out.println("               ※省略した場合は8080番で起動する");
+                    System.out.println("               [指定例]");
+                    System.out.println("               -httpbindport 9090");
+                    System.out.println("  ");
+                    System.out.println("  ");
+                    System.out.println(" -httpcontext:HTTPサーバモードの起動時のコンテキストを限定したい場合に利用する");
+                    System.out.println("              HTTPサーバモードで起動した場合のみ有効");
+                    System.out.println("              **省略可能**");
+                    System.out.println("              ※省略した場合は全てのコンテキストが1入力になる");
+                    System.out.println("              [指定例]");
+                    System.out.println("              -httpcontext setsuna");
+                    System.out.println("               上記の場合の入力URLは以下となる");
+                    System.out.println("               http://setsunaexample.org/setsuna");
                     System.out.println("  ");
                     System.out.println("  ");
                     System.out.println("  ");
@@ -343,16 +394,56 @@ public class SetsunaMain {
                     System.out.println("  ");
                     System.out.println("  ");
                     System.out.println(" -easyquery:SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。");
-                    System.out.println("            現在利用可能な関数とその機能は以下");
-                    System.out.println("            [関数一覧]");
-                    System.out.println("            'avg_over':特定のカラムの平均が指定値以上か調べる(table, column, overvalue)");
-                    System.out.println("            'avg_below':特定のカラムの平均が指定値以下か調べる(table, column, belowvalue)");
-                    System.out.println("            'over_value':特定のカラムの最大値が指定値以上か調べる(table, column, overvalue)");
-                    System.out.println("            'below_value':特定のカラムの最小値が指定値以下か調べる(table, column, belowvalue)");
-                    System.out.println("            'avg_more_over':特定のカラムの平均の指定倍以上の値が存在するか調べる(table, column, multiple_number)");
-                    System.out.println("            [指定例]");
-                    System.out.println("             -easyquery avg_over(pipe, column4, 3)");
-                    System.out.println("             ※内部で実際に実行されているSQLは-debug onで確認可能");
+                    System.out.println("              -queryと同時指定は不可となる。");
+                    System.out.println("              現在利用可能な関数とその機能は以下");
+                    System.out.println("              ※特殊オプションとしてavg_over、avg_below、over_value、below_value、time_range_in_avg_over、time_range_in_avg_below、time_range_in_value_multi_existこれらの関数の");
+                    System.out.println("                最後の引き数である'条件指定の値'部分は自由に特定のテーブルのカラムの値に置換して実行可能となっています。");
+                    System.out.println("                これは常に最新の値が適応されて実行されるため、別のテーブルにパラメータを投入し続けておけば、関数にあたえる引き数を動的に");
+                    System.out.println("                変動させれることになります。つまり'avg_over'関数であれば、あるカラムの平均値が別のテーブルのあるカラムの最新値よりも");
+                    System.out.println("                大きければ、イベント実行のようなことが可能です。");
+                    System.out.println("                指定方法は'テーブル名:カラム名'のフォーマットで引き数部分に指定します。最後の実行例の部分にも例があるので、合わせて");
+                    System.out.println("                参照してください。");
+                    System.out.println("              [関数一覧]");
+                    System.out.println("              'avg_over':特定のテーブルの特定のカラムの全てのデータの平均が指定値以上か調べる");
+                    System.out.println("                         オプションでの表記方= -easyquery 'avg_over(対象Table名, 対象Column名, 条件指定の値)'");
+                    System.out.println("            ");
+                    System.out.println("              'avg_below':特定のテーブルの特定のカラムの平均が指定値以下か調べる");
+                    System.out.println("                         オプションでの表記方= -easyquery 'avg_below(対象Table名, 対象Column名, 条件指定の値)'");
+                    System.out.println("            ");
+                    System.out.println("              'over_value':特定のテーブルの特定のカラムの最大値が指定値以上か調べる");
+                    System.out.println("                          オプションでの表記方= -easyquery 'over_value(対象Table名, 対象Column名, 条件指定の値)'");
+                    System.out.println("            ");
+                    System.out.println("              'below_value':特定のテーブルの特定のカラムの最小値が指定値以下か調べる");
+                    System.out.println("                            オプションでの表記方= -easyquery 'below_value(対象Table名, 対象Column名, 条件指定の値)'");
+                    System.out.println("            ");
+                    System.out.println("              'avg_more_over':特定のテーブルの特定のカラムの平均の指定倍以上の値が存在するか調べる");
+                    System.out.println("                              オプションでの表記方= -easyquery 'avg_more_over(対象Table名, 対象Column名, 条件指定の値)'");
+                    System.out.println("            ");
+                    System.out.println("              'last_time_avg_more_over':特定のテーブルの特定のカラムの直近特定秒以内のデータの平均値を特定倍以上超えるデータがあるか調べる");
+                    System.out.println("                                        オプションでの表記方= -easyquery 'last_time_avg_more_over(対象Table名, 対象Column名, 直近の特定秒, 特定倍)'");
+                    System.out.println("            ");
+                    System.out.println("              'count_last_time_avg_more_over':上記の条件のデータが特定件数以上ある");
+                    System.out.println("                                              オプションでの表記方= -easyquery 'count_last_time_avg_more_over(対象Table名, 対象Column名, 直近の特定秒, 特定倍, 特定件数)'");
+                    System.out.println("            ");
+                    System.out.println("              'time_range_in_avg_over':直近からの過去指定値秒間の特定のテーブルの特定カラムの平均値が指定値以上である");
+                    System.out.println("                                       オプションでの表記方= -easyquery 'time_range_in_avg_over(対象Table名, 対象Column名, 直近から過去指定秒, 指定値)'");
+                    System.out.println("            ");
+                    System.out.println("              'time_range_in_avg_below':直近からの過去指定値秒間の特定のテーブルの特定カラムの平均値が指定値以下である");
+                    System.out.println("                                        オプションでの表記方= -easyquery 'time_range_in_avg_below(対象Table名, 対象Column名, 直近から過去指定秒, 指定値)'");
+                    System.out.println("            ");
+                    System.out.println("              'time_range_in_value_multi_exist':特定のテーブルの特定のカラムの値が同じ値が直近からの過去指定秒間以内に指定値回登場する");
+                    System.out.println("                                                オプションでの表記方= -easyquery 'time_range_in_value_multi_exist(対象Table名, 対象Column名, 直近から過去指定秒, 指定回数)'");
+                    System.out.println("            ");
+                    System.out.println("              'last_range_avg_over':特定のテーブルの特定のカラムの値の一定時間前の一定期間の平均値と現在も一定期間の平均値を比べ指定した倍数分現在の平均値が大きいかを判定");
+                    System.out.println("                                    現在が2時だとした場合、24時間前の1時から2時までの間のあるカラムの値の平均値と現在の1時から2時までの間のあるカラムの値の平均値を比べて現在の方が24時間前の平均値の2倍になっていたらイベント実行などに使う");
+                    System.out.println("                                    上記の場合、指定方法は以下のようになる。(ロードアベレージをtopコマンドで流し込んで-streamでloadaveragetableという名前にして、loadaverageというカラムを-columnで指定した想定場合の想定");
+                    System.out.println("                                    last_range_avg_over(loadaveragetable, loadaverage, 3600, 86400, 2) <=先頭から-streamで指定した値、カラム名、1時～2時を表す3600秒、24時間前を表す86400秒、2倍を表す2)");
+                    System.out.println("                                    オプションでの表記方= -easyquery 'last_range_avg_over(対象Table名, 対象Column名, 指定一定期間(秒/単位), 一定時間前(秒/単位), 指定倍)'");
+                    System.out.println("            ");
+                    System.out.println("              [指定例]");
+                    System.out.println("               -easyquery avg_over(pipe, column4, 3) ");
+                    System.out.println("               -easyquery avg_over(pipe, column4, parametertable:column1) <=パラメータに他のテーブルにあるカラムの値を用いた場合");
+                    System.out.println("               ※内部で実際に実行されているSQLは-debug onで確認可能");
                     System.out.println("  ");
                     System.out.println("  ");
                     System.out.println(" -event:イベントで実行するスクリプト(シェルやbatなど)を指定");
@@ -480,10 +571,14 @@ public class SetsunaMain {
 
             // それぞの要素を呼び出し
             AbstractCoreEngine coreAdapterEngine = null;
-            if (!SetsunaStaticConfig.DEFAULT_EASY_SERVER_MODE) {
-                coreAdapterEngine = this.startPipeAdapter();
-            } else {
+            if (SetsunaStaticConfig.DEFAULT_EASY_SERVER_MODE) {
+            
                 coreAdapterEngine = this.startEasyServerAdapter();
+            } else if (SetsunaStaticConfig.DEFAULT_HTTP_SERVER_MODE) {
+            
+                coreAdapterEngine = this.startHttpServerAdapter();
+            } else {
+                coreAdapterEngine = this.startPipeAdapter();
             }
             AbstractCoreEngine coreQueryEngine = this.startQuery();
             AbstractCoreEngine coreUserEventEngine = this.startUserEvent();
@@ -525,7 +620,7 @@ public class SetsunaMain {
 
 
     private AbstractCoreEngine startEasyServerAdapter() throws Exception {
-        // Setsunaに対するAdapterを開始
+        // Setsunaに対するMsgPack-RPC-Adapterを開始
         AbstractCoreEngine coreAdapterEngine = null;
         IAdapter easyServerAdapter = null;
 
@@ -539,6 +634,27 @@ public class SetsunaMain {
             SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGET = SetsunaStaticConfig.DEFAULT_EASY_SERVER_TABLE_NAME;
             // 標準のパイプラインアダプターを利用する
             coreAdapterEngine = setsunaCore.executeAdapterEngine(easyServerAdapter);
+        } catch (Exception e) {
+            throw e;
+        }
+        return coreAdapterEngine;
+    }
+
+    private AbstractCoreEngine startHttpServerAdapter() throws Exception {
+        // Setsunaに対するHTTP-Adapterを開始
+        AbstractCoreEngine coreAdapterEngine = null;
+        IAdapter httpServerAdapter = null;
+
+        try {
+            // Server型の入力を監視する
+            httpServerAdapter = new DefaultHttpServerAdapter(SetsunaStaticConfig.DEFAULT_HTTP_SERVER_BIND_ADDRESS,
+                                                             SetsunaStaticConfig.DEFAULT_HTTP_SERVER_BIND_PORT,
+                                                             SetsunaStaticConfig.DEFAULT_PIPEINPUT_COLUMN_LIST,
+                                                             SetsunaStaticConfig.DEFAULT_PIPEINPUT_DATA_ARRIVAL_TIME,
+                                                             SetsunaStaticConfig.DEFAULT_HTTP_SERVER_CONTEXT);
+            // 監視するAdapter名を代入(ここでは標準の設定を利用する)
+            SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGET = SetsunaStaticConfig.DEFAULT_HTTP_SERVER_TABLE_NAME;
+            coreAdapterEngine = setsunaCore.executeAdapterEngine(httpServerAdapter);
         } catch (Exception e) {
             throw e;
         }
@@ -584,7 +700,7 @@ public class SetsunaMain {
                 }
             }
 
-            // クエリーを実行
+            // クエリーを実行(ここで指定したSetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGETがQueryがQueueからデータを取得するさいに利用される
             coreQueryEngine = setsunaCore.executeQueryEngine("PipedQuery", SetsunaStaticConfig.DEFAULT_PIPEINPUT_QUERY_TARGET, causeContainer, conditionContainer);
 
         } catch (Exception e) {

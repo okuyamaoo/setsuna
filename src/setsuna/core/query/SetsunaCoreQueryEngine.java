@@ -49,7 +49,9 @@ public class SetsunaCoreQueryEngine extends AbstractCoreEngine {
         String myName = super.getEngineName();
         try {
             while (true) {
+
                 Map adapterData = (Map)EngineJoinQueueFolder.pollAapterOutputQueue(myName, 50, TimeUnit.MILLISECONDS);
+
 
                 if (adapterData == null && stopFlg == true) break;
                 if (adapterData == null) continue;
