@@ -15,6 +15,7 @@ public class EasyQueryCompiler {
      * 簡易型クエリーのパーサー.<br>
      * 引数の各こうもくは全てコーテーション及び、ダブルコーテーションなしの値を指定
      * 時間の概念は全て秒単位で指定
+     * 引き数のhogevalueの部分を"テーブル名:カラム名"の形式で記述すると指定したテーブルの指定カラムの最新の値に置換される
      * "avg_over":特定のカラムの平均が指定値以上か調べる(table, column, overvalue)
      * "avg_below":特定のカラムの平均が指定値以下か調べる(table, column, belowvalue)
      * "over_value":特定のカラムの最大値が指定値以上か調べる(table, column, overvalue)
@@ -25,11 +26,10 @@ public class EasyQueryCompiler {
      * "time_range_in_avg_over":直近の指定値秒間の特定カラムの平均値が指定値以上である(table, column, rangetime, overvalue)
      * "time_range_in_avg_below":直近の指定値秒間の特定カラムの平均値が指定値以下である(table, column, rangetime, belowvalue)
      * "time_range_in_value_multi_exist":あるテーブルのあるカラムの値が同じ値が直近からの指定秒間以内に指定値回登場する(table, column, rangetime, over_value)
-     * "last_range_avg_over":あるテーブルのあるカラムの値の一定時間前の一定期間の平均値と現在同一一定期間の平均値を比べ指定した倍数分現在の平均値が大きいかを判定(table, column, rangetime, beforeseconde, multiple_number)
+     * "last_range_avg_over":あるテーブルのあるカラムの値の一定時間前の一定期間の平均値と現在も一定期間の平均値を比べ指定した倍数分現在の平均値が大きいかを判定(table, column, rangetime, beforeseconde, multiple_number)
      *                       現在が2時だとした場合、24時間前の1時から2時までの間のあるカラムの値の平均値と現在の1時から2時までの間のあるカラムの値の平均値を比べて現在の方が24時間前の平均値の2倍になっていたらイベント実行などに使う
-     *                       上記の場合、指定方法は以下のようになる
+     *                       上記の場合、指定方法は以下のようになる。(ロードアベレージをtopコマンドで流し込んで-streamでloadaveragetableという名前にして、loadaverageというカラムを-columnで指定した想定場合の想定
      *                       last_range_avg_over(loadaveragetable, loadaverage, 3600, 86400, 2) <=先頭から-streamで指定した値、カラム名、1時～2時を表す3600秒、24時間前を表す86400秒、2倍を表す2)
-     * "last_range_avg_below":
      */
     public static String[] compileFunction2Sql(String queryString) throws Exception {
         List sqlList = new ArrayList();
@@ -46,25 +46,70 @@ public class EasyQueryCompiler {
 
                 // table, column, overvalue
                 sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
-                sql = "select * from (" + sql + ") where avgval >  " + params[2];
+                try {
+                    Integer.parseInt(params[2].trim());
+                    sql = "select * from (" + sql + ") where avgval >  " + params[2];
+                } catch (NumberFormatException ne) {
+                    if (params[2].indexOf(":") != -1) {
+                        String[] otherTableTarget = params[2].split(":");
+                        String otherTableSql = "(SELECT to_number(" + otherTableTarget[1].trim() + ") FROM " + otherTableTarget[0].trim() + " ORDER BY C_TIME DESC LIMIT 1)";
+                        sql = "select * from (" + sql + ") where avgval >  " + otherTableSql;
+                    } else {
+                        throw ne;
+                    }
+                }
                 sqlList.add(sql);
             } else if (convertTargetStr.indexOf("avg_below(") == 0) {
 
                 // table, column, belowvalue
                 sql = "select avg(to_number(" +  params[1] + ")) as avgval from " + params[0];
-                sql = "select * from (" + sql + ") where avgval <  " + params[2];
+                try {
+                    Integer.parseInt(params[2].trim());
+                    sql = "select * from (" + sql + ") where avgval <  " + params[2];
+                } catch (NumberFormatException ne) {
+                    if (params[2].indexOf(":") != -1) {
+                        String[] otherTableTarget = params[2].split(":");
+                        String otherTableSql = "(SELECT to_number(" + otherTableTarget[1].trim() + ") FROM " + otherTableTarget[0].trim() + " ORDER BY C_TIME DESC LIMIT 1)";
+                        sql = "select * from (" + sql + ") where avgval <  " + otherTableSql;
+                    } else {
+                        throw ne;
+                    }
+                }
                 sqlList.add(sql);
             } else if (convertTargetStr.indexOf("over_value(") == 0) {
 
                 // table, column, overvalue
                 sql = "select max(to_number(" +  params[1] + ")) as maxval from " + params[0];
-                sql = "select * from (" + sql + ") where maxval >  " + params[2];
+                try {
+                    Integer.parseInt(params[2].trim());
+                    sql = "select * from (" + sql + ") where maxval >  " + params[2];
+                } catch (NumberFormatException ne) {
+                    if (params[2].indexOf(":") != -1) {
+                        String[] otherTableTarget = params[2].split(":");
+                        String otherTableSql = "(SELECT to_number(" + otherTableTarget[1].trim() + ") FROM " + otherTableTarget[0].trim() + " ORDER BY C_TIME DESC LIMIT 1)";
+                        sql = "select * from (" + sql + ") where maxval >  " + otherTableSql;
+                    } else {
+                        throw ne;
+                    }
+                }
                 sqlList.add(sql);
             } else if (convertTargetStr.indexOf("below_value(") == 0) {
 
                 // table, column, belowvalue
                 sql = "select min(to_number(" +  params[1] + ")) as minval from " + params[0];
-                sql = "select * from (" + sql + ") where minval  < " + params[2];
+
+                try {
+                    Integer.parseInt(params[2].trim());
+                    sql = "select * from (" + sql + ") where minval  < " + params[2];
+                } catch (NumberFormatException ne) {
+                    if (params[2].indexOf(":") != -1) {
+                        String[] otherTableTarget = params[2].split(":");
+                        String otherTableSql = "(SELECT to_number(" + otherTableTarget[1].trim() + ") FROM " + otherTableTarget[0].trim() + " ORDER BY C_TIME DESC LIMIT 1)";
+                        sql = "select * from (" + sql + ") where minval  < " + otherTableSql;
+                    } else {
+                        throw ne;
+                    }
+                }
                 sqlList.add(sql);
             } else if (convertTargetStr.indexOf("avg_more_over(") == 0) {
 
@@ -87,20 +132,53 @@ public class EasyQueryCompiler {
             } else if (convertTargetStr.indexOf("time_range_in_avg_over(") == 0) {
 
                 // table, column, rangetime, overvalue
-                sql = "select " + params[1] + " from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
-                sql = "select * from (" + sql+ ") where to_number(" + params[1] + ") >= " +  params[3];
+                sql = "select avg(to_number(" + params[1] + ")) as avgval from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
+                try {
+                    Integer.parseInt(params[3].trim());
+                    sql = "select * from (" + sql+ ") where avgval >= " +  params[3];
+                } catch (NumberFormatException ne) {
+                    if (params[3].indexOf(":") != -1) {
+                        String[] otherTableTarget = params[3].split(":");
+                        String otherTableSql = "(SELECT to_number(" + otherTableTarget[1].trim() + ") FROM " + otherTableTarget[0].trim() + " ORDER BY C_TIME DESC LIMIT 1)";
+                        sql = "select * from (" + sql+ ") where avgval >= " +  otherTableSql;
+                    } else {
+                        throw ne;
+                    }
+                }
                 sqlList.add(sql);
             } else if (convertTargetStr.indexOf("time_range_in_avg_below(") == 0) {
 
                 // table, column, rangetime, belowvalue
-                sql = "select " + params[1] + " from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
-                sql = "select * from (" + sql+ ") where to_number(" + params[1] + ") <= " +  params[3];
+                sql = "select avg(to_number(" + params[1] + ")) as avgval from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp)";
+                try {
+                    Integer.parseInt(params[3].trim());
+                    sql = "select * from (" + sql+ ") where avgval <= " +  params[3];
+                } catch (NumberFormatException ne) {
+                    if (params[3].indexOf(":") != -1) {
+                        String[] otherTableTarget = params[3].split(":");
+                        String otherTableSql = "(SELECT to_number(" + otherTableTarget[1].trim() + ") FROM " + otherTableTarget[0].trim() + " ORDER BY C_TIME DESC LIMIT 1)";
+                        sql = "select * from (" + sql+ ") where avgval <= " +  otherTableSql;
+                    } else {
+                        throw ne;
+                    }
+                }
                 sqlList.add(sql);
             } else if (convertTargetStr.indexOf("time_range_in_value_multi_exist(") == 0) {
 
                 // table, column, rangetime, multiple_number
                 sql = "select " + params[1] + " as val, count(" + params[1] + ") as cnt from " + params[0] + " where C_TIME > DATEADD(SECOND, -" + params[2] + ", current_timestamp) group by " + params[1];
-                sql = "select * from (" + sql+ ") where cnt >= " +  params[3];
+                try {
+                    Integer.parseInt(params[3].trim());
+                    sql = "select * from (" + sql+ ") where cnt >= " +  params[3];
+                } catch (NumberFormatException ne) {
+                    if (params[3].indexOf(":") != -1) {
+                        String[] otherTableTarget = params[3].split(":");
+                        String otherTableSql = "(SELECT to_number(" + otherTableTarget[1].trim() + ") FROM " + otherTableTarget[0].trim() + " ORDER BY C_TIME DESC LIMIT 1)";
+                        sql = "select * from (" + sql+ ") where cnt >= " +  otherTableSql;
+                    } else {
+                        throw ne;
+                    }
+                }
                 sqlList.add(sql);
             } else if (convertTargetStr.indexOf("last_range_avg_over(") == 0) {
 
