@@ -1,6 +1,6 @@
 [Setsunaとは]
 SetsunaはComplex Event Processing エンジンです。
-複数のデータストリームに対してリアルタイムにSQL記述で
+複数のデータストリームに対してリアルタイムにSQL記述、関数指定で
 横断的に検索を行いデータの変化を掴み、利用者の
 作成したイベントを実行できます。
 
@@ -178,7 +178,7 @@ Apache License, Version 2.0
   ----------------------------
   --- 各オプション詳細一覧 ---
   ----------------------------
-   ※特に重要なオプションは-server、-httpserver -trigger -query -event -stream -sep -dstです
+   ※特に重要なオプションは-server、-trigger -query -event -stream -sep -dstです
    ※デバッグ関係のオプションは-debug、-errorlogです
   
  -stream:標準入力・サーバモード入力から受取るデータの名前。ここで指定した名前で一時テーブルが作成されるため、-queryなどでこの指定値を利用する。
@@ -381,16 +381,56 @@ Apache License, Version 2.0
   
   
  -easyquery:SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。
-            現在利用可能な関数とその機能は以下
-            [関数一覧]
-            'avg_over':特定のカラムの平均が指定値以上か調べる(table, column, overvalue)
-            'avg_below':特定のカラムの平均が指定値以下か調べる(table, column, belowvalue)
-            'over_value':特定のカラムの最大値が指定値以上か調べる(table, column, overvalue)
-            'below_value':特定のカラムの最小値が指定値以下か調べる(table, column, belowvalue)
-            'avg_more_over':特定のカラムの平均の指定倍以上の値が存在するか調べる(table, column, multiple_number)
-            [指定例]
-             -easyquery avg_over(pipe, column4, 3)
-             ※内部で実際に実行されているSQLは-debug onで確認可能
+              -queryと同時指定は不可となる。
+              現在利用可能な関数とその機能は以下
+              ※特殊オプションとしてavg_over、avg_below、over_value、below_value、time_range_in_avg_over、time_range_in_avg_below、time_range_in_value_multi_existこれらの関数の
+                最後の引き数である'条件指定の値'部分は自由に特定のテーブルのカラムの値に置換して実行可能となっています。
+                これは常に最新の値が適応されて実行されるため、別のテーブルにパラメータを投入し続けておけば、関数にあたえる引き数を動的に
+                変動させれることになります。つまり'avg_over'関数であれば、あるカラムの平均値が別のテーブルのあるカラムの最新値よりも
+                大きければ、イベント実行のようなことが可能です。
+                指定方法は'テーブル名:カラム名'のフォーマットで引き数部分に指定します。最後の実行例の部分にも例があるので、合わせて
+                参照してください。
+              [関数一覧]
+              'avg_over':特定のテーブルの特定のカラムの全てのデータの平均が指定値以上か調べる
+                         オプションでの表記方= -easyquery 'avg_over(対象Table名, 対象Column名, 条件指定の値)'
+            
+              'avg_below':特定のテーブルの特定のカラムの平均が指定値以下か調べる
+                         オプションでの表記方= -easyquery 'avg_below(対象Table名, 対象Column名, 条件指定の値)'
+            
+              'over_value':特定のテーブルの特定のカラムの最大値が指定値以上か調べる
+                          オプションでの表記方= -easyquery 'over_value(対象Table名, 対象Column名, 条件指定の値)'
+            
+              'below_value':特定のテーブルの特定のカラムの最小値が指定値以下か調べる
+                            オプションでの表記方= -easyquery 'below_value(対象Table名, 対象Column名, 条件指定の値)'
+            
+              'avg_more_over':特定のテーブルの特定のカラムの平均の指定倍以上の値が存在するか調べる
+                              オプションでの表記方= -easyquery 'avg_more_over(対象Table名, 対象Column名, 条件指定の値)'
+            
+              'last_time_avg_more_over':特定のテーブルの特定のカラムの直近特定秒以内のデータの平均値を特定倍以上超えるデータがあるか調べる
+                                        オプションでの表記方= -easyquery 'last_time_avg_more_over(対象Table名, 対象Column名, 直近の特定秒, 特定倍)'
+            
+              'count_last_time_avg_more_over':上記の条件のデータが特定件数以上ある
+                                              オプションでの表記方= -easyquery 'count_last_time_avg_more_over(対象Table名, 対象Column名, 直近の特定秒, 特定倍, 特定件数)'
+            
+              'time_range_in_avg_over':直近からの過去指定値秒間の特定のテーブルの特定カラムの平均値が指定値以上である
+                                       オプションでの表記方= -easyquery 'time_range_in_avg_over(対象Table名, 対象Column名, 直近から過去指定秒, 指定値)'
+            
+              'time_range_in_avg_below':直近からの過去指定値秒間の特定のテーブルの特定カラムの平均値が指定値以下である
+                                        オプションでの表記方= -easyquery 'time_range_in_avg_below(対象Table名, 対象Column名, 直近から過去指定秒, 指定値)'
+            
+              'time_range_in_value_multi_exist':特定のテーブルの特定のカラムの値が同じ値が直近からの過去指定秒間以内に指定値回登場する
+                                                オプションでの表記方= -easyquery 'time_range_in_value_multi_exist(対象Table名, 対象Column名, 直近から過去指定秒, 指定回数)'
+            
+              'last_range_avg_over':特定のテーブルの特定のカラムの値の一定時間前の一定期間の平均値と現在も一定期間の平均値を比べ指定した倍数分現在の平均値が大きいかを判定
+                                    現在が2時だとした場合、24時間前の1時から2時までの間のあるカラムの値の平均値と現在の1時から2時までの間のあるカラムの値の平均値を比べて現在の方が24時間前の平均値の2倍になっていたらイベント実行などに使う
+                                    上記の場合、指定方法は以下のようになる。(ロードアベレージをtopコマンドで流し込んで-streamでloadaveragetableという名前にして、loadaverageというカラムを-columnで指定した想定場合の想定
+                                    last_range_avg_over(loadaveragetable, loadaverage, 3600, 86400, 2) <=先頭から-streamで指定した値、カラム名、1時～2時を表す3600秒、24時間前を表す86400秒、2倍を表す2)
+                                    オプションでの表記方= -easyquery 'last_range_avg_over(対象Table名, 対象Column名, 指定一定期間(秒/単位), 一定時間前(秒/単位), 指定倍)'
+            
+              [指定例]
+               -easyquery avg_over(pipe, column4, 3) 
+               -easyquery avg_over(pipe, column4, parametertable:column1) <=パラメータに他のテーブルにあるカラムの値を用いた場合
+               ※内部で実際に実行されているSQLは-debug onで確認可能
   
   
  -event:イベントで実行するスクリプト(シェルやbatなど)を指定
@@ -456,6 +496,7 @@ Apache License, Version 2.0
          ※省略した場合は9092となる
          [指定例]
          -dbport 9999
+  
 
 [info]
 バグ報告や機能要望などはta.okuyamaoo[at]gmail.comに連絡をお願いします。
