@@ -33,17 +33,113 @@
   SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。
   現在利用可能な関数とその機能は以下
   [関数一覧]");
-  'avg_over':特定のカラムの平均が指定値以上か調べる(対象Table名, 対象Column名, 条件指定の値)
-  'avg_below':特定のカラムの平均が指定値以下か調べる(対象Table名, 対象Column名, 条件指定の値)
-  'over_value':特定のカラムの最大値が指定値以上か調べる(対象Table名, 対象Column名, 条件指定の値)
-  'below_value':特定のカラムの最小値が指定値以下か調べる(対象Table名, 対象Column名, 条件指定の値)
-  'avg_more_over':特定のカラムの平均の指定倍以上の値が存在するか調べる(対象Table名, 対象Column名, 条件指定の値)
+  'avg_over':特定のテーブルの特定のカラムの全てのデータの平均が指定値以上か調べる
+             オプションでの表記方= -easyquery "avg_over(対象Table名, 対象Column名, 条件指定の値)"
+
+  'avg_below':特定のテーブルの特定のカラムの平均が指定値以下か調べる
+             オプションでの表記方= -easyquery "avg_below(対象Table名, 対象Column名, 条件指定の値)"
+
+  'over_value':特定のテーブルの特定のカラムの最大値が指定値以上か調べる
+              オプションでの表記方= -easyquery "over_value(対象Table名, 対象Column名, 条件指定の値)"
+
+  'below_value':特定のテーブルの特定のカラムの最小値が指定値以下か調べる
+                オプションでの表記方= -easyquery "below_value(対象Table名, 対象Column名, 条件指定の値)"
+
+  'avg_more_over':特定のテーブルの特定のカラムの平均の指定倍以上の値が存在するか調べる
+                  オプションでの表記方= -easyquery "avg_more_over(対象Table名, 対象Column名, 条件指定の値)"
+
+  'last_time_avg_more_over':特定のテーブルの特定のカラムの直近特定秒以内のデータの平均値を特定倍以上超えるデータがあるか調べる
+                            オプションでの表記方= -easyquery "last_time_avg_more_over(対象Table名, 対象Column名, 直近の特定秒, 特定倍)"
+
+  'count_last_time_avg_more_over':上記の条件のデータが特定件数以上ある
+                                  オプションでの表記方= -easyquery "count_last_time_avg_more_over(対象Table名, 対象Column名, 直近の特定秒, 特定倍, 特定件数)"
+
+  'time_range_in_avg_over':直近からの過去指定値秒間の特定のテーブルの特定カラムの平均値が指定値以上である
+                           オプションでの表記方= -easyquery "time_range_in_avg_over(対象Table名, 対象Column名, 直近から過去指定秒, 指定値)"
+
+  'time_range_in_avg_below':直近からの過去指定値秒間の特定のテーブルの特定カラムの平均値が指定値以下である
+                            オプションでの表記方= -easyquery "time_range_in_avg_below(対象Table名, 対象Column名, 直近から過去指定秒, 指定値)"
+
+  'time_range_in_value_multi_exist':特定のテーブルの特定のカラムの値が同じ値が直近からの過去指定秒間以内に指定値回登場する
+                                    オプションでの表記方= -easyquery "time_range_in_value_multi_exist(対象Table名, 対象Column名, 直近から過去指定秒, 指定回数)"
+
+  'last_range_avg_over':特定のテーブルの特定のカラムの値の一定時間前の一定期間の平均値と現在も一定期間の平均値を比べ指定した倍数分現在の平均値が大きいかを判定
+                        現在が2時だとした場合、24時間前の1時から2時までの間のあるカラムの値の平均値と現在の1時から2時までの間のあるカラムの値の平均値を比べて現在の方が24時間前の平均値の2倍になっていたらイベント実行などに使う
+                        上記の場合、指定方法は以下のようになる。(ロードアベレージをtopコマンドで流し込んで-streamでloadaveragetableという名前にして、loadaverageというカラムを-columnで指定した想定場合の想定
+                        last_range_avg_over(loadaveragetable, loadaverage, 3600, 86400, 2) <=先頭から-streamで指定した値、カラム名、1時～2時を表す3600秒、24時間前を表す86400秒、2倍を表す2)
+                        オプションでの表記方= -easyquery "last_range_avg_over(対象Table名, 対象Column名, 指定一定期間(秒/単位), 一定時間前(秒/単位), 指定倍)"
+
   [指定例]");
    -easyquery avg_over(pipe, column4, 3)
    ※内部で実際に実行されているSQLは-debug onで確認可能
 
 
-サーバモードを追加
+・HTTPサーバモードを追加
+  HTTPプロトコルでの入力を受け付ける、HTTPサーバモードを追加。
+  外部のサーバからHTTP通信でデータを流し込むことが可能となります。
+  デフォトではポート番号8080番で起動しています。コンテキストは全てが対象となります。
+  内部のHTTPサーバにはJetty(http://jetty.codehaus.org/jetty/)を利用しています。
+  リリース物はsetsuna-0.0.3リリース時のJetty7の最新バージョンである7.6.3で稼動確認を行っています。
+  またlib/jetty/配下にコンパイル、実行時に必要なJerttyのjarファイルを同梱しているが、常に最新を利用することを
+  推奨します。最新版のJettyに変更してビルドする際はbuild.xmlの"project.class.path"要素ないのパスを変更してください。
+
+
+  (起動方法) !!注意!! 従来の-jar指定での利用はできません。
+  $java -classpath ./:./setsuna.jar:./lib/jetty/* setsuna.core.SetsunaMain -httpserver true
+
+  (データを流し込むスクリプトをwgetで記述した場合)
+  $wget "http://localhost:8080/?column1=00001&column2=data1&column3=type00001"
+
+  下記はオプションの詳しい利用方法となる
+  -httpserver:HTTPサーバモードの起動指定
+              HTTPサーバで起動した場合はデフォルト8080番ポートでHTTPプロトコルでAdapter入力を待ち受ける
+              待ち受けるコンテキストは指定なくルート直下全てが対象となる。つまり「http://setsunaexample.org/」のように指定することになる
+              待ち受けるコンテキストを指定したい場合は-httpcontextオプションを利用する
+              HTTP通信で1リクエスト1データとして入力が可能
+              ・入力のHTTPパラメータのフォーマットはKey=Valueとする。このKeyの部分がSetsunaの内部DBのカラム名となり、
+                Valueの部分はデータとなる。-columnを指定している場合は、指定した名前でHTTPパラメータ内を探索するため、
+                指定したKeyが無ければパラメータが作れずエラーとなる。
+                Getでのリクエストを例にすると以下は4つのカラムデータを投入している
+                http://setsunaexample.org/?column1=XXX1&column2=20120501120000&column3=testdata1&column4=exampledata1
+              入力後、返却される値はHTTPステータスコードだけとなり、bodyの返却はない
+              ・HTTPステータスコードの対応は以下となる
+                200 : 入力成功
+                400 : 入力データが最初にSetsunaに投入された場合と入力パラメータ数が異なる。正しいからメータ数にすれば復旧可能
+                500 : Setsuna側でなんだかのサーバエラーが発生している。クライアントによる復旧不可
+              -serverと同時に指定すると-serverで起動するMessagePack-RPCでのサーバが優先されこちらは起動しない
+              本モードで起動した場合に-query等で利用するテーブル名は-streamを指定しない場合、'server'というテーブル名になる
+              **省略可能**
+              ※省略した場合はパイプ入力となる
+              [指定例]
+                -httpserver true
+   
+   
+  -httpbindaddr:HTTPサーバモードの起動時のサーバがバインドするアドレス
+                HTTPサーバモードで起動した場合のみ有効
+                **省略可能**
+                ※省略した場合は0.0.0.0にバインドされる
+                [指定例]
+                 -httpbindaddr 192.168.1.1
+   
+   
+  -httpbindport:HTTPサーバモードの起動時のサーバが待ち受けるポート番号
+                RHEL系のOSの場合、root権限意外では80番を指定することは出来ない場合があるため注意が必要である
+                HTTPサーバモードで起動した場合のみ有効
+                **省略可能**
+                ※省略した場合は8080番で起動する
+                [指定例]
+                -httpbindport 9090
+   
+   
+  -httpcontext:HTTPサーバモードの起動時のコンテキストを限定したい場合に利用する
+               HTTPサーバモードで起動した場合のみ有効
+               **省略可能**
+               ※省略した場合は全てのコンテキストが1入力になる
+               [指定例]
+               -httpcontext setsuna
+                上記の場合の入力URLは以下となる
+                http://setsunaexample.org/setsuna
+
 ・従来のコマンドラインモードではなく完全なサーバモード
 　外部からサーバを起動出来て、-trigger,-query,-eventの全てを指定できるモード
 　サーバI/Fには、MessagePack-RPCを利用

@@ -178,7 +178,7 @@ Apache License, Version 2.0
   ----------------------------
   --- 各オプション詳細一覧 ---
   ----------------------------
-   ※特に重要なオプションは-server、-trigger -query -event -stream -sep -dstです
+   ※特に重要なオプションは-server、-httpserver -trigger -query -event -stream -sep -dstです
    ※デバッグ関係のオプションは-debug、-errorlogです
   
  -stream:標準入力・サーバモード入力から受取るデータの名前。ここで指定した名前で一時テーブルが作成されるため、-queryなどでこの指定値を利用する。
@@ -191,6 +191,7 @@ Apache License, Version 2.0
  -server:サーバモードの起動指定
          サーバモードで起動した場合、MessagePack-RPCで作られたサーバでデータの投入を待ち受ける
          MessagePack-RPCで作成されたクライアントでデータを投入することが出来る
+         本モードで起動した場合に-query等で利用するテーブル名は-streamを指定しない場合、'server'というテーブル名になる
          サーバ側で定義されているRPCメソッド定義は以下
          [メソッド定義]
           int next ( String[] sendData )
@@ -215,6 +216,56 @@ Apache License, Version 2.0
            ※省略した場合は10028番で起動する
            [指定例]
             -bindport 10222
+  
+  
+ -httpserver:HTTPサーバモードの起動指定
+             HTTPサーバで起動した場合はデフォルト8080番ポートでHTTPプロトコルでAdapter入力を待ち受ける
+             待ち受けるコンテキストは指定なくルート直下全てが対象となる。つまり「http://setsunaexample.org/」のように指定することになる
+             待ち受けるコンテキストを指定したい場合は-httpcontextオプションを利用する
+             HTTP通信で1リクエスト1データとして入力が可能
+             ・入力のHTTPパラメータのフォーマットはKey=Valueとする。このKeyの部分がSetsunaの内部DBのカラム名となり、
+               Valueの部分はデータとなる。-columnを指定している場合は、指定した名前でHTTPパラメータ内を探索するため、
+               指定したKeyが無ければパラメータが作れずエラーとなる。
+               Getでのリクエストを例にすると以下は4つのカラムデータを投入している
+               http://setsunaexample.org/?column1=XXX1&column2=20120501120000&column3=testdata1&column4=exampledata1
+             入力後、返却される値はHTTPステータスコードだけとなり、bodyの返却はない
+             ・HTTPステータスコードの対応は以下となる
+               200 : 入力成功
+               400 : 入力データが最初にSetsunaに投入された場合と入力パラメータ数が異なる。正しいからメータ数にすれば復旧可能
+               500 : Setsuna側でなんだかのサーバエラーが発生している。クライアントによる復旧不可
+             -serverと同時に指定すると-serverで起動するMessagePack-RPCでのサーバが優先されこちらは起動しない
+             本モードで起動した場合に-query等で利用するテーブル名は-streamを指定しない場合、'server'というテーブル名になる
+             **省略可能**
+             ※省略した場合はパイプ入力となる
+             [指定例]
+               -httpserver true
+  
+  
+ -httpbindaddr:HTTPサーバモードの起動時のサーバがバインドするアドレス
+               HTTPサーバモードで起動した場合のみ有効
+               **省略可能**
+               ※省略した場合は0.0.0.0にバインドされる
+               [指定例]
+                -httpbindaddr 192.168.1.1
+  
+  
+ -httpbindport:HTTPサーバモードの起動時のサーバが待ち受けるポート番号
+               RHEL系のOSの場合、root権限意外では80番を指定することは出来ない場合があるため注意が必要である
+               HTTPサーバモードで起動した場合のみ有効
+               **省略可能**
+               ※省略した場合は8080番で起動する
+               [指定例]
+               -httpbindport 9090
+  
+  
+ -httpcontext:HTTPサーバモードの起動時のコンテキストを限定したい場合に利用する
+              HTTPサーバモードで起動した場合のみ有効
+              **省略可能**
+              ※省略した場合は全てのコンテキストが1入力になる
+              [指定例]
+              -httpcontext setsuna
+               上記の場合の入力URLは以下となる
+               http://setsunaexample.org/setsuna
   
   
   
@@ -329,6 +380,19 @@ Apache License, Version 2.0
          -count true
   
   
+ -easyquery:SQLを直接記述せずに関数を呼び出し、SQLでの確認と同等のことを行う。
+            現在利用可能な関数とその機能は以下
+            [関数一覧]
+            'avg_over':特定のカラムの平均が指定値以上か調べる(table, column, overvalue)
+            'avg_below':特定のカラムの平均が指定値以下か調べる(table, column, belowvalue)
+            'over_value':特定のカラムの最大値が指定値以上か調べる(table, column, overvalue)
+            'below_value':特定のカラムの最小値が指定値以下か調べる(table, column, belowvalue)
+            'avg_more_over':特定のカラムの平均の指定倍以上の値が存在するか調べる(table, column, multiple_number)
+            [指定例]
+             -easyquery avg_over(pipe, column4, 3)
+             ※内部で実際に実行されているSQLは-debug onで確認可能
+  
+  
  -event:イベントで実行するスクリプト(シェルやbatなど)を指定
           フルパス指定を推奨
         指定されたスクリプトは-triggerか-queryで指定した全てがマッチした場合に実行される
@@ -373,6 +437,25 @@ Apache License, Version 2.0
         [指定例]
          -debug on
          -debug only
+  
+  
+ -masterport:スタンドアロンモードで起動する場合、マスターサーバとして起動するためのチェックに利用するポート番号
+             ここで指定したポート番号で起動してるサーバがいなければ、マスターとなる。
+             注意!!:この指定をおこなう場合は同じサーバ内で起動するSetsunaは全て同じ設定を適応する必要がある。
+             数値で指定する
+             **省略可能**
+             ※省略した場合は10027となる
+             [指定例]
+             -masterport 9999
+  
+  
+ -dbport:スタンドアロンモードで起動する場合の内部DBのポート番号
+         数値で指定する
+         注意!!:この指定をおこなう場合は同じサーバ内で起動するSetsunaは全て同じ設定を適応する必要がある。
+         **省略可能**
+         ※省略した場合は9092となる
+         [指定例]
+         -dbport 9999
 
 [info]
 バグ報告や機能要望などはta.okuyamaoo[at]gmail.comに連絡をお願いします。
